@@ -5,6 +5,8 @@ slot asignado e id del usuario
 package com.mariluz.agenda.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,6 +22,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 @Data
 @Builder
+@Entity(name = "reservation")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Reservation {
@@ -31,15 +34,14 @@ public class Reservation {
     @Column(nullable = false)
     private UUID userId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "agendaSlotId", nullable = false)
-    @Column(nullable = false)
-    private Integer agendaSlotId;
+    private AgendaSlot agendaSlot;
 
     @Column(nullable = false)
     private String status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "serviceId", nullable = false)
     private Services service;
 

@@ -15,17 +15,21 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity(name = "agenda_config")
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
+@Entity(name = "agenda_config")
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 public class AgendaConfig {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
     @Column(nullable = false)
     private Time StartWorkTime; // hora inicio de jornada
 

@@ -1,19 +1,18 @@
-/*
-Clase para autenticar solicitudes REST
-*/
 package com.mariluz.agenda.security;
 
-import io.jsonwebtoken.io.IOException;
+import com.mariluz.agenda.model.User;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -25,59 +24,55 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
     @Override
     protected void doFilterInternal(
         HttpServletRequest request,
         HttpServletResponse response,
         FilterChain filterChain
-    ) throws ServletException, IOException, java.io.IOException {
-        // 1. obtener token de la request
+    ) throws ServletException, IOException {
         final String token = getTokenFromRequest(request);
-        final String username;
 
-        // 2. retornar si es null
         if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 3. obtener username del token
-        username = jwtUtil.getUsernameFromToken(token);
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                if (!jwtUtil.isTokenExpired(token)) {
+                    User currentUser = jwtUtil.getUserFromToken(token);
 
-        // 4. si el nombre no es null
-        if (
-            username != null &&
-            SecurityContextHolder.getContext().getAuthentication() == null
-        ) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(
-                username
-            );
-
-            // 5. validamos el token
-            if (jwtUtil.isTokenValid(token, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
+                    List<SimpleGrantedAuthority> authorities = List.of(
+                        new SimpleGrantedAuthority(
+                            "ROLE_" + currentUser.getRole()
+                        )
                     );
 
-                // 6. seteamos los detalles del authToken
-                authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                // 7. seteamos el authToken al context de seguridad
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                            currentUser,
+                            null,
+                            authorities
+                        );
+
+                    authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(
+                            request
+                        )
+                    );
+
+                    SecurityContextHolder.getContext().setAuthentication(
+                        authToken
+                    );
+                }
+            } catch (JwtException | IllegalArgumentException e) {
+                SecurityContextHolder.clearContext();
             }
         }
 
         filterChain.doFilter(request, response);
     }
 
-    // funcion para extraer el token
     private String getTokenFromRequest(HttpServletRequest request) {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
@@ -86,6 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         ) {
             return authHeader.substring(7);
         }
+
         return null;
     }
 }
