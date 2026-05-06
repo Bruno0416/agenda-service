@@ -9,8 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.sql.Time;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -31,20 +31,20 @@ public class AgendaConfig {
     private Integer id;
 
     @Column(nullable = false)
-    private Time StartWorkTime; // hora inicio de jornada
+    private LocalTime startWorkTime; // hora inicio de jornada
 
     @Column(nullable = false)
-    private Time EndWorkTime; // hora fin de jornada
+    private LocalTime endWorkTime; // hora fin de jornada
 
     @Column(nullable = false)
-    private Integer SlotDurationMin; // duracion del slot en minutos
+    private Integer slotDuration; // duracion del slot en minutos
 
     @Column(nullable = false)
-    private Integer BreakMin; //break en minutos
+    private Integer breakTime; //break en minutos
 
     @Setter(AccessLevel.NONE) // para no generar nada automaticamente
     @Column(nullable = false)
-    private List<Integer> WorkDays; // solo 1-7 | lo validamos con el dto
+    private List<Integer> workDays; // solo 1-7 | lo validamos con el dto
 
     @Column(nullable = false)
     private LocalDateTime updatedAt; // fecha/hora actualizacion

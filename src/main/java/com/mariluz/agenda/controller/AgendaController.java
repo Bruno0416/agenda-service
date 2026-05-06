@@ -1,11 +1,12 @@
 package com.mariluz.agenda.controller;
 
-import com.mariluz.agenda.model.User;
+import com.mariluz.agenda.dto.AgendaConfigRequest;
+import com.mariluz.agenda.dto.AgendaConfigResponse;
 import com.mariluz.agenda.service.AgendaService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/agenda")
@@ -14,8 +15,18 @@ public class AgendaController {
     @Autowired
     private AgendaService service;
 
-    @GetMapping("/me")
-    public User me() {
-        return service.me();
+    // ----- Endpoints -----
+    // 1. configurar agenda (admin)
+    @PostMapping("/config")
+    private ResponseEntity<AgendaConfigResponse> configAgenda(
+        @Valid @RequestBody AgendaConfigRequest request
+    ) {
+        return ResponseEntity.ok().body(service.configAgenda(request));
     }
+
+    // 2. generar agenda(admin)
+
+    // 3. crear servicios (admin)
+
+    // 4. reservar slot
 }
