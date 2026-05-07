@@ -68,7 +68,8 @@ public class AgendaServiceImpl implements AgendaService {
         int days = today.lengthOfMonth() - today.getDayOfMonth();
         // 3. recorrer lista con los dias y filtrar los feriados
         for (int i = 0; i <= days; i++) {
-            int day = today.plusDays(i).getDayOfWeek().getValue() - 1;
+            int day = today.plusDays(i).getDayOfWeek().getValue() - 1; // lunes = 0, domingo = 6 | + 1 para que tenga los mismos valores que nuestro list
+
             System.out.printf(day + "\n");
         }
         // 4. crear los bloques horarios
