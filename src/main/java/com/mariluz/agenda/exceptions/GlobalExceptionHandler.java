@@ -15,6 +15,16 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Handler permisos usuario
+    @ExceptionHandler(UnauthorizedOperationException.class)
+    public ResponseEntity<Map<String, String>> handleEmailAlreadyInUse(
+        UnauthorizedOperationException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+            Map.of("error", ex.getMessage())
+        );
+    }
+
     // Global Handler | Validacion BindingResult ahora se corrobora aqui en el global handler
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationErrors(
