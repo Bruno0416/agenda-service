@@ -6,6 +6,7 @@ import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
 import com.mariluz.agenda.model.User;
 import com.mariluz.agenda.repository.AgendaConfigRepository;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,7 +45,6 @@ public class AgendaServiceImpl implements AgendaService {
             .startWorkTime(agendaConfig.getStartWorkTime())
             .endWorkTime(agendaConfig.getEndWorkTime())
             .slotDuration(agendaConfig.getSlotDuration())
-            .breakTime(agendaConfig.getBreakTime())
             .workDays(agendaConfig.getWorkDays())
             .build();
     }
@@ -66,8 +66,11 @@ public class AgendaServiceImpl implements AgendaService {
         // 2. calcular dias para generar horarios (int)
         LocalDate today = LocalDate.now();
         int days = today.lengthOfMonth() - today.getDayOfMonth();
-        // 3. recorrer lista con los dias y filtrar los feriados y fin de semana
-        for (int i = 1; i <= days; i++) {}
+        // 3. recorrer lista con los dias y filtrar los feriados
+        for (int i = 0; i <= days; i++) {
+            int day = today.plusDays(i).getDayOfWeek().getValue() - 1;
+            System.out.printf(day + "\n");
+        }
         // 4. crear los bloques horarios
         // 5. retornamos mensaje de exito
     }

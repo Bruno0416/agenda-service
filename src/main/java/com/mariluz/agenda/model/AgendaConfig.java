@@ -37,10 +37,7 @@ public class AgendaConfig {
     private LocalTime endWorkTime; // hora fin de jornada
 
     @Column(nullable = false)
-    private Integer slotDuration; // duracion del slot en minutos
-
-    @Column(nullable = false)
-    private Integer breakTime; //break en minutos
+    private Integer slotDuration; // duracion del slot en minutoss
 
     @Setter(AccessLevel.NONE) // para no generar nada automaticamente
     @Column(nullable = false)
