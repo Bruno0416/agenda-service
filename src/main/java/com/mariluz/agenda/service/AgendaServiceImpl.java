@@ -18,14 +18,15 @@ public class AgendaServiceImpl implements AgendaService {
     @Autowired
     private AgendaConfigRepository agendaConfigRepo;
 
+    // 1. configurar agenda (admin)
     @Override
     public AgendaConfigResponse configAgenda(AgendaConfigRequest request) {
-        // Validar rol del usuario
+        // 1. Validar rol del usuario
         validateAdminAcces();
         // 2. guardar configuracion
         AgendaConfig agendaConfig = agendaConfigRepo.save(
             AgendaConfig.builder()
-                .id(1) // guardamos con el id 1 para no crear una nueva tupla
+                .id(1) // guardamos con el id 1 para actualizar la configuracion y no crear una tupla nueva
                 .startWorkTime(request.getStartWorkTime())
                 .endWorkTime(request.getEndWorkTime())
                 .slotDuration(request.getSlotDuration())
@@ -45,7 +46,14 @@ public class AgendaServiceImpl implements AgendaService {
             .build();
     }
 
+    // 2. generar agenda(admin)
+
+    // 3. crear servicios (admin)
+
+    // 4. reservar slot (cliente)
+
     // ------------------ Helper para validar rol usuario -------------------
+
     private User getCurrentUser() {
         Authentication auth =
             SecurityContextHolder.getContext().getAuthentication();
@@ -61,7 +69,8 @@ public class AgendaServiceImpl implements AgendaService {
     private void validateAdminAcces() {
         User user = getCurrentUser();
 
-        if (!"ADMIN".equalsIgnoreCase(user.getRole())) {
+        if (!user.getRole().equalsIgnoreCase("ADMIN")) {
+            // si el usuario no es admin arrojamos un error
             throw new UnauthorizedOperationException(
                 "Solo un administrador puede configurar la agenda"
             );

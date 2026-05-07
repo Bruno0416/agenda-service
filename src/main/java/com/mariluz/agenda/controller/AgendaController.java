@@ -28,5 +28,5 @@ public class AgendaController {
 
     // 3. crear servicios (admin)
 
-    // 4. reservar slot
+    // 4. reservar slot (cliente)
 }
