@@ -29,4 +29,8 @@ public class Services {
 
     @Column(nullable = false, length = 80)
     private String description;
+
+    // TODO: revisar atributo
+    @Column(nullable = false)
+    private Integer estimatedPrice;
 }

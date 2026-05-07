@@ -6,7 +6,10 @@ import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
 import com.mariluz.agenda.model.User;
 import com.mariluz.agenda.repository.AgendaConfigRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,7 +25,7 @@ public class AgendaServiceImpl implements AgendaService {
     @Override
     public AgendaConfigResponse configAgenda(AgendaConfigRequest request) {
         // 1. Validar rol del usuario
-        validateAdminAcces();
+        validateAdminAccess();
         // 2. guardar configuracion
         AgendaConfig agendaConfig = agendaConfigRepo.save(
             AgendaConfig.builder()
@@ -46,9 +49,30 @@ public class AgendaServiceImpl implements AgendaService {
             .build();
     }
 
-    // 2. generar agenda(admin)
+    /*
+    2. generar agenda(admin) ----> solo genera la agenda para el mes
+    ---> depende de 'https://api.boostr.cl/holidays.json' para encontrar dias feriados
+    */
 
-    // 3. crear servicios (admin)
+    private void createAgenda() {
+        // 1. acceder a la configuracion de agenda
+        Optional<AgendaConfig> configOpt = agendaConfigRepo.findById(1);
+        if (configOpt.isEmpty()) {
+            throw new RuntimeException();
+        }
+
+        AgendaConfig config = configOpt.get();
+
+        // 2. calcular dias para generar horarios (int)
+        LocalDate today = LocalDate.now();
+        int days = today.lengthOfMonth() - today.getDayOfMonth();
+        // 3. recorrer lista con los dias y filtrar los feriados y fin de semana
+        for (int i = 1; i <= days; i++) {}
+        // 4. crear los bloques horarios
+        // 5. retornamos mensaje de exito
+    }
+
+    // 3. crear/agregar servicios (admin)
 
     // 4. reservar slot (cliente)
 
@@ -66,7 +90,7 @@ public class AgendaServiceImpl implements AgendaService {
         return user;
     }
 
-    private void validateAdminAcces() {
+    private void validateAdminAccess() {
         User user = getCurrentUser();
 
         if (!user.getRole().equalsIgnoreCase("ADMIN")) {

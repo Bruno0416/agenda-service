@@ -38,13 +38,11 @@ public class Reservation {
     @JoinColumn(name = "agendaSlotId", nullable = false)
     private AgendaSlot agendaSlot;
 
-    @Column(nullable = false)
-    private String status;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "serviceId", nullable = false)
     private Services service;
 
+    // TODO: revisar atributo
     @Column(nullable = false)
     private double estimatedPrice;
 
