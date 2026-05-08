@@ -2,6 +2,7 @@ package com.mariluz.agenda.service;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
+import com.mariluz.agenda.exceptions.InvalidWorkTimeException;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
 import com.mariluz.agenda.model.AgendaSlot;
@@ -35,10 +36,17 @@ public class AgendaServiceImpl implements AgendaService {
     public AgendaConfigResponse configAgenda(AgendaConfigRequest request) {
         // 1. Validar rol del usuario
         validateAdminAccess();
+        // validar datos request
+        if (!request.getStartWorkTime().isBefore(request.getEndWorkTime())) {
+            throw new InvalidWorkTimeException(
+                "La hora de termino de la jornada no puede ser antes de la hora inicio"
+            );
+        }
         // 2. guardar configuracion
         AgendaConfig agendaConfig = agendaConfigRepo.save(
             AgendaConfig.builder()
-                .id(1) // guardamos con el id 1 para actualizar la configuracion y no crear una tupla nueva
+                // guardamos con el id 1 para actualizar la configuracion y no crear una tupla nueva
+                .id(1)
                 .startWorkTime(request.getStartWorkTime())
                 .endWorkTime(request.getEndWorkTime())
                 .slotDuration(request.getSlotDuration())
@@ -125,9 +133,7 @@ public class AgendaServiceImpl implements AgendaService {
                 });
             }
         }
-        System.out.println("[DEBUG] slots a guardar: " + slotsToSave.size());
         agendaSlotRepo.saveAll(slotsToSave);
-        System.out.println("[DEBUG] registros db: " + agendaSlotRepo.count());
     }
 
     // 3. crear/agregar servicios (admin)
