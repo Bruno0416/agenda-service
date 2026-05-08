@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.hibernate.validator.constraints.UniqueElements;
 
 @Data
 @Builder
@@ -31,5 +32,6 @@ public class AgendaConfigRequest {
     private Integer breakTime;
 
     @NotNull(message = "Los dias de trabajo no pueden estar vacios.")
+    @UniqueElements(message = "Los días de trabajo no pueden repetirse.")
     private List<@Min(1) @Max(7) Integer> workDays;
 }

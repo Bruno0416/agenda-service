@@ -4,12 +4,17 @@ import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
+import com.mariluz.agenda.model.AgendaSlot;
 import com.mariluz.agenda.model.User;
 import com.mariluz.agenda.repository.AgendaConfigRepository;
-import java.time.DayOfWeek;
+import com.mariluz.agenda.repository.AgendaSlotRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -21,6 +26,9 @@ public class AgendaServiceImpl implements AgendaService {
 
     @Autowired
     private AgendaConfigRepository agendaConfigRepo;
+
+    @Autowired
+    private AgendaSlotRepository agendaSlotRepo;
 
     // 1. configurar agenda (admin)
     @Override
@@ -34,7 +42,6 @@ public class AgendaServiceImpl implements AgendaService {
                 .startWorkTime(request.getStartWorkTime())
                 .endWorkTime(request.getEndWorkTime())
                 .slotDuration(request.getSlotDuration())
-                .breakTime(request.getBreakTime())
                 .workDays(request.getWorkDays())
                 .updatedAt(LocalDateTime.now())
                 .build()
@@ -53,27 +60,65 @@ public class AgendaServiceImpl implements AgendaService {
     2. generar agenda(admin) ----> solo genera la agenda para el mes
     ---> depende de 'https://api.boostr.cl/holidays.json' para encontrar dias feriados
     */
-
-    private void createAgenda() {
+    public void createAgenda() {
         // 1. acceder a la configuracion de agenda
         Optional<AgendaConfig> configOpt = agendaConfigRepo.findById(1);
         if (configOpt.isEmpty()) {
-            throw new RuntimeException();
+            throw new RuntimeException(); // TODO: crear excepcion custom
         }
 
         AgendaConfig config = configOpt.get();
 
         // 2. calcular dias para generar horarios (int)
         LocalDate today = LocalDate.now();
-        int days = today.lengthOfMonth() - today.getDayOfMonth();
-        // 3. recorrer lista con los dias y filtrar los feriados
-        for (int i = 0; i <= days; i++) {
-            int day = today.plusDays(i).getDayOfWeek().getValue() - 1; // lunes = 0, domingo = 6 | + 1 para que tenga los mismos valores que nuestro list
+        int daysToGenerate =
+            today.plusDays(1).lengthOfMonth() - today.getDayOfMonth();
 
-            System.out.printf(day + "\n");
+        // 3. calcular bloques de horario completos
+        Map<LocalTime, LocalTime> blocks = new HashMap<>();
+        LocalTime current = config.getStartWorkTime();
+        LocalTime end = config.getEndWorkTime();
+        Integer slotDuration = config.getSlotDuration();
+
+        while (
+            current.plusMinutes(slotDuration).isBefore(end) ||
+            current.plusMinutes(slotDuration).equals(end)
+        ) {
+            // 1. calcular fin del rango e inicio del siguiente
+            LocalTime next = current.plusMinutes(slotDuration);
+            // 2. agregamos al Map
+            blocks.put(current, next);
+            // 3. next(siguiente) pasa a ser el current(actual)
+            current = next;
         }
-        // 4. crear los bloques horarios
-        // 5. retornamos mensaje de exito
+
+        // 3. recorrer lista con los dias | mas adelante -> filtrar los feriados
+        List<AgendaSlot> slotsToSave = new ArrayList<>();
+        for (int i = 0; i <= daysToGenerate; i++) {
+            // 4. crear los bloques horarios
+
+            LocalDate date = today.plusDays(i);
+            // 1. obtener valor dia de la semana
+            // lunes = 0, domingo = 6 | + 1 para que tenga los mismos valores que nuestro list
+            int dayValue = today.plusDays(i).getDayOfWeek().getValue();
+
+            List<Integer> workDays = config.getWorkDays();
+            // 2. ver si el valor esta en la lista
+            if (workDays.contains(dayValue)) {
+                // 3. crear horarios
+                blocks.forEach((startTime, endTime) -> {
+                    slotsToSave.add(
+                        AgendaSlot.builder()
+                            .startTime(startTime)
+                            .endTime(endTime)
+                            .date(date)
+                            .isAvailable(true)
+                            .build()
+                    );
+                });
+            }
+        }
+        agendaSlotRepo.saveAll(slotsToSave);
     }
 
     // 3. crear/agregar servicios (admin)
