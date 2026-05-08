@@ -109,29 +109,10 @@ public class AgendaServiceImpl implements AgendaService {
 
             List<Integer> workDays = config.getWorkDays();
             // 2. ver si el valor esta en la lista
-            System.out.println(
-                "[DEBUG] generando bloque para fecha: " +
-                    date +
-                    " dia: " +
-                    dayValue
-            );
-            System.out.println(
-                "[DEBUG] Dia: " +
-                    date +
-                    " esta en workDays: " +
-                    workDays.contains(dayValue)
-            );
+
             if (workDays.contains(dayValue)) {
                 // 3. crear horarios
                 blocks.forEach((startTime, endTime) -> {
-                    System.out.println(
-                        "[DEBUG] generando bloque para fecha: " +
-                            date +
-                            " horario: " +
-                            startTime +
-                            " - " +
-                            endTime
-                    );
                     slotsToSave.add(
                         AgendaSlot.builder()
                             .startTime(startTime)
@@ -144,8 +125,9 @@ public class AgendaServiceImpl implements AgendaService {
                 });
             }
         }
-
-        // agendaSlotRepo.saveAll(slotsToSave);
+        System.out.println("[DEBUG] slots a guardar: " + slotsToSave.size());
+        agendaSlotRepo.saveAll(slotsToSave);
+        System.out.println("[DEBUG] registros db: " + agendaSlotRepo.count());
     }
 
     // 3. crear/agregar servicios (admin)
