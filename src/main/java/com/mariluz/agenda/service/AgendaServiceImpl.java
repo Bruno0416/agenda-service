@@ -60,18 +60,20 @@ public class AgendaServiceImpl implements AgendaService {
     2. generar agenda(admin) ----> solo genera la agenda para el mes
     ---> depende de 'https://api.boostr.cl/holidays.json' para encontrar dias feriados
     */
-    public void createAgenda() {
+    @Override
+    public void generateAgenda() {
         //Validar rol del usuario
         validateAdminAccess();
         // 1. acceder a la configuracion de agenda
         Optional<AgendaConfig> configOpt = agendaConfigRepo.findById(1);
         if (configOpt.isEmpty()) {
-            throw new RuntimeException(); // TODO: crear excepcion custom
+            throw new RuntimeException();
         }
 
         AgendaConfig config = configOpt.get();
 
         // 2. calcular dias para generar horarios (int)
+        // LocalDate endOfMonth = today.with(TemporalAdjusters.lastDayOfMonth());
         LocalDate today = LocalDate.now();
         int daysToGenerate =
             today.plusDays(1).lengthOfMonth() - today.getDayOfMonth();
@@ -106,20 +108,24 @@ public class AgendaServiceImpl implements AgendaService {
 
             List<Integer> workDays = config.getWorkDays();
             // 2. ver si el valor esta en la lista
+
             if (workDays.contains(dayValue)) {
                 // 3. crear horarios
                 blocks.forEach((startTime, endTime) -> {
                     slotsToSave.add(
+                        //agendaSlotRepo.save(
                         AgendaSlot.builder()
                             .startTime(startTime)
                             .endTime(endTime)
                             .date(date)
                             .isAvailable(true)
+                            .updatedAt(LocalDateTime.now())
                             .build()
                     );
                 });
             }
         }
+
         agendaSlotRepo.saveAll(slotsToSave);
     }
 

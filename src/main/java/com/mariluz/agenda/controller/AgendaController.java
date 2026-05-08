@@ -18,13 +18,18 @@ public class AgendaController {
     // ----- Endpoints -----
     // 1. configurar agenda (admin)
     @PostMapping("/config")
-    private ResponseEntity<AgendaConfigResponse> configAgenda(
+    public ResponseEntity<AgendaConfigResponse> configAgenda(
         @Valid @RequestBody AgendaConfigRequest request
     ) {
         return ResponseEntity.ok().body(service.configAgenda(request));
     }
 
     // 2. generar agenda(admin)
+    @PostMapping("/generate")
+    public ResponseEntity<?> generateAgenda() {
+        service.generateAgenda();
+        return ResponseEntity.ok().body("");
+    }
 
     // 3. crear servicios (admin)
 
