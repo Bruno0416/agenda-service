@@ -78,7 +78,7 @@ public class AgendaServiceImpl implements AgendaService {
         // 1. acceder a la configuracion de agenda
         Optional<AgendaConfig> configOpt = agendaConfigRepo.findById(1);
         if (configOpt.isEmpty()) {
-            throw new RuntimeException();
+            throw new RuntimeException(); // No deberia ocurrir (inicializamos la tabla con el AgendaconfigLoader)
         }
 
         AgendaConfig config = configOpt.get();

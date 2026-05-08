@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -37,6 +39,8 @@ public class AgendaConfig {
     private LocalTime endWorkTime; // hora fin de jornada
 
     @Column(nullable = false)
+    @Positive(message = "La duracion del bloque debe ser numero positivo")
+    @Min(value = 10, message = "El bloque debe durar minimo 10Min")
     private Integer slotDuration; // duracion del slot en minutoss
 
     @Setter(AccessLevel.NONE) // para no generar nada automaticamente
