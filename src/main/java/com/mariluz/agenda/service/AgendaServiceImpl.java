@@ -61,6 +61,8 @@ public class AgendaServiceImpl implements AgendaService {
     ---> depende de 'https://api.boostr.cl/holidays.json' para encontrar dias feriados
     */
     public void createAgenda() {
+        //Validar rol del usuario
+        validateAdminAccess();
         // 1. acceder a la configuracion de agenda
         Optional<AgendaConfig> configOpt = agendaConfigRepo.findById(1);
         if (configOpt.isEmpty()) {
