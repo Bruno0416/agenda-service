@@ -62,8 +62,11 @@ public class AgendaServiceImpl implements AgendaService {
     */
     @Override
     public void generateAgenda() {
-        //Validar rol del usuario
+        //------ Validar rol del usuario //------
         validateAdminAccess();
+
+        // ----------- validar si ya se crearon los horarios para el mes antes de ejecutar -----------
+
         // 1. acceder a la configuracion de agenda
         Optional<AgendaConfig> configOpt = agendaConfigRepo.findById(1);
         if (configOpt.isEmpty()) {
@@ -73,7 +76,6 @@ public class AgendaServiceImpl implements AgendaService {
         AgendaConfig config = configOpt.get();
 
         // 2. calcular dias para generar horarios (int)
-        // LocalDate endOfMonth = today.with(TemporalAdjusters.lastDayOfMonth());
         LocalDate today = LocalDate.now();
         int daysToGenerate =
             today.plusDays(1).lengthOfMonth() - today.getDayOfMonth();
@@ -100,20 +102,37 @@ public class AgendaServiceImpl implements AgendaService {
         List<AgendaSlot> slotsToSave = new ArrayList<>();
         for (int i = 0; i <= daysToGenerate; i++) {
             // 4. crear los bloques horarios
-
             LocalDate date = today.plusDays(i);
             // 1. obtener valor dia de la semana
-            // lunes = 0, domingo = 6 | + 1 para que tenga los mismos valores que nuestro list
+            // lunes = 1, domingo = 7
             int dayValue = today.plusDays(i).getDayOfWeek().getValue();
 
             List<Integer> workDays = config.getWorkDays();
             // 2. ver si el valor esta en la lista
-
+            System.out.println(
+                "[DEBUG] generando bloque para fecha: " +
+                    date +
+                    " dia: " +
+                    dayValue
+            );
+            System.out.println(
+                "[DEBUG] Dia: " +
+                    date +
+                    " esta en workDays: " +
+                    workDays.contains(dayValue)
+            );
             if (workDays.contains(dayValue)) {
                 // 3. crear horarios
                 blocks.forEach((startTime, endTime) -> {
+                    System.out.println(
+                        "[DEBUG] generando bloque para fecha: " +
+                            date +
+                            " horario: " +
+                            startTime +
+                            " - " +
+                            endTime
+                    );
                     slotsToSave.add(
-                        //agendaSlotRepo.save(
                         AgendaSlot.builder()
                             .startTime(startTime)
                             .endTime(endTime)
@@ -126,7 +145,7 @@ public class AgendaServiceImpl implements AgendaService {
             }
         }
 
-        agendaSlotRepo.saveAll(slotsToSave);
+        // agendaSlotRepo.saveAll(slotsToSave);
     }
 
     // 3. crear/agregar servicios (admin)
