@@ -3,6 +3,7 @@ package com.mariluz.agenda.service;
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
 import com.mariluz.agenda.exceptions.InvalidWorkTimeException;
+import com.mariluz.agenda.exceptions.SlotsAlreadyGenerated;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
 import com.mariluz.agenda.model.AgendaSlot;
@@ -12,9 +13,11 @@ import com.mariluz.agenda.repository.AgendaSlotRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +38,7 @@ public class AgendaServiceImpl implements AgendaService {
     @Override
     public AgendaConfigResponse configAgenda(AgendaConfigRequest request) {
         // 1. Validar rol del usuario
-        validateAdminAccess();
+        validateAdminAccess("Solo un administrador puede configurar la agenda");
         // validar datos request
         if (!request.getStartWorkTime().isBefore(request.getEndWorkTime())) {
             throw new InvalidWorkTimeException(
@@ -71,25 +74,43 @@ public class AgendaServiceImpl implements AgendaService {
     @Override
     public void generateAgenda() {
         //------ Validar rol del usuario //------
-        validateAdminAccess();
+        validateAdminAccess("Solo un administrador puede generar la agenda");
 
         // ----------- validar si ya se crearon los horarios para el mes antes de ejecutar -----------
+        LocalDate today = LocalDate.now();
+
+        // encontrar el ultimo registro de bloque horario | segun fecha
+        Optional<AgendaSlot> lastSlot =
+            agendaSlotRepo.findFirstByOrderByDateDesc();
+
+        // si existen bloques y son despues de la fecha actual, no permitimos la creacion de nuevos bloques
+        if (lastSlot.isPresent() && lastSlot.get().getDate().isAfter(today)) {
+            LocalDate lastSlotDate = lastSlot.get().getDate();
+
+            throw new SlotsAlreadyGenerated(
+                "Los horarios para el mes ya han sido generados. Intente nuevamente despues del " +
+                    lastSlotDate.format(
+                        DateTimeFormatter.ofPattern(
+                            "dd 'de' MMMM",
+                            Locale.of("es")
+                        )
+                    )
+            );
+        }
 
         // 1. acceder a la configuracion de agenda
         Optional<AgendaConfig> configOpt = agendaConfigRepo.findById(1);
         if (configOpt.isEmpty()) {
-            throw new RuntimeException(); // No deberia ocurrir (inicializamos la tabla con el AgendaconfigLoader)
+            throw new RuntimeException(); // No deberia ocurrir (inicializamos la tabla con el AgendaConfigLoader)
         }
 
         AgendaConfig config = configOpt.get();
 
-        // 2. calcular dias para generar horarios (int)
-        LocalDate today = LocalDate.now();
-        int daysToGenerate =
-            today.plusDays(1).lengthOfMonth() - today.getDayOfMonth();
+        // 2. calcular dias a generar | podemos dejar como int fijo de 30 para evitar errores
+        int daysToGenerate = 30; // today.plusDays(1).lengthOfMonth() - today.getDayOfMonth();
 
         // 3. calcular bloques de horario completos
-        Map<LocalTime, LocalTime> blocks = new HashMap<>();
+        Map<LocalTime, LocalTime> blocks = new LinkedHashMap<>(); // usamos LinkedHashMap para mantener el orden de insercion
         LocalTime current = config.getStartWorkTime();
         LocalTime end = config.getEndWorkTime();
         Integer slotDuration = config.getSlotDuration();
@@ -136,7 +157,7 @@ public class AgendaServiceImpl implements AgendaService {
         agendaSlotRepo.saveAll(slotsToSave);
     }
 
-    // 3. crear/agregar servicios (admin)
+    // 3. mostrar horarios (con id para seleccionar)
 
     // 4. reservar slot (cliente)
 
@@ -154,14 +175,12 @@ public class AgendaServiceImpl implements AgendaService {
         return user;
     }
 
-    private void validateAdminAccess() {
+    private void validateAdminAccess(String message) {
         User user = getCurrentUser();
 
         if (!user.getRole().equalsIgnoreCase("ADMIN")) {
             // si el usuario no es admin arrojamos un error
-            throw new UnauthorizedOperationException(
-                "Solo un administrador puede configurar la agenda"
-            );
+            throw new UnauthorizedOperationException(message);
         }
     }
 }

@@ -14,6 +14,5 @@ public class AgendaConfigResponse {
     private LocalTime startWorkTime;
     private LocalTime endWorkTime;
     private Integer slotDuration;
-    private Integer breakTime;
     private List<Integer> workDays;
 }

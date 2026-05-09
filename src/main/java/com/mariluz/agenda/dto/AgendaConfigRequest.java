@@ -3,6 +3,7 @@ package com.mariluz.agenda.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 import java.util.List;
@@ -28,10 +29,15 @@ public class AgendaConfigRequest {
     @NotNull(message = "la duracion del slot no puede estar vacia.")
     private Integer slotDuration;
 
-    @NotNull(message = "La duracion del break no puede estar vacia.")
-    private Integer breakTime;
-
-    @NotNull(message = "Los dias de trabajo no pueden estar vacios.")
+    @NotEmpty(message = "Los dias de trabajo no pueden estar vacios.")
     @UniqueElements(message = "Los días de trabajo no pueden repetirse.")
-    private List<@Min(1) @Max(7) Integer> workDays;
+    private List<
+        @Min(
+            value = 1,
+            message = "El valor mínimo a ingresar debe ser 1 representando lunes"
+        ) @Max(
+            value = 7,
+            message = "El valor máximo a ingresar debe ser 7 representando domingo"
+        ) Integer
+    > workDays;
 }

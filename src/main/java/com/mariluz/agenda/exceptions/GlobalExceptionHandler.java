@@ -15,13 +15,54 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Handler Horario invalido
+    @ExceptionHandler(InvalidWorkTimeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidWorkTimeException(
+        InvalidWorkTimeException ex,
+        HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Horario invalido")
+                .errors(Map.of("error", ex.getMessage()))
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
+    // Handler bloques horarios
+    @ExceptionHandler(SlotsAlreadyGenerated.class)
+    public ResponseEntity<ErrorResponse> handleSlotsAlreadyGenerated(
+        SlotsAlreadyGenerated ex,
+        HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Los bloques horarios ya han sido generados")
+                .errors(Map.of("error", ex.getMessage()))
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
     // Handler permisos usuario
     @ExceptionHandler(UnauthorizedOperationException.class)
-    public ResponseEntity<Map<String, String>> handleEmailAlreadyInUse(
-        UnauthorizedOperationException ex
+    public ResponseEntity<ErrorResponse> handleUnauthorizedOperation(
+        UnauthorizedOperationException ex,
+        HttpServletRequest request
     ) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-            Map.of("error", ex.getMessage())
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Debe ser administrador para realizar esta operacion")
+                .errors(Map.of("error", ex.getMessage()))
+                .endpoint(request.getRequestURI())
+                .build()
         );
     }
 
@@ -49,7 +90,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    // Validacion Parseo de hora TODO: unir ambos handlers para permitir mostrar los binding errors
+    // Validacion Parseo de hora (json)
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleJsonParseError(
         HttpMessageNotReadableException ex,
