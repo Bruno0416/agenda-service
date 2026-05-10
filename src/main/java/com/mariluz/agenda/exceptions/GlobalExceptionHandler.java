@@ -1,6 +1,8 @@
 package com.mariluz.agenda.exceptions;
 
 import com.mariluz.agenda.dto.ErrorResponse;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -96,8 +98,7 @@ public class GlobalExceptionHandler {
         HttpMessageNotReadableException ex,
         HttpServletRequest request
     ) {
-        Map<String, String> errors = new HashMap<>();
-        errors.put(
+        Map<String, String> error = Map.of(
             "error",
             "Revise el formato de hora en los campos enviados. Formato correcto: HH:mm, Ej: 09:00"
         );
@@ -107,7 +108,52 @@ public class GlobalExceptionHandler {
                 .timeStamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())
                 .message("Hora mal formateada")
-                .errors(errors)
+                .errors(error)
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
+    // Handler token expirado
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ErrorResponse> handleExpiredTokenException(
+        ExpiredJwtException ex,
+        HttpServletRequest request
+    ) {
+        Map<String, String> error = Map.of(
+            "error",
+            "El token ha expirado. Por favor, inicie sesión nuevamente."
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message("Token expirado")
+                .errors(error)
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
+    // Handler error generico de JWT
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ErrorResponse> handleJsonParseError(
+        JwtException ex,
+        HttpServletRequest request
+    ) {
+        Map<String, String> error = Map.of(
+            "error",
+            "El token proporcionado es inválido o está corrupto."
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message("Error de token")
+                .errors(error)
                 .endpoint(request.getRequestURI())
                 .build()
         );

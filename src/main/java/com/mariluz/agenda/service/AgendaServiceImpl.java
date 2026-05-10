@@ -107,8 +107,8 @@ public class AgendaServiceImpl implements AgendaService {
 
         AgendaConfig config = configOpt.get();
 
-        // 2. calcular dias a generar | podemos dejar como int fijo de 30 para evitar errores
-        int daysToGenerate = 30; // today.plusDays(1).lengthOfMonth() - today.getDayOfMonth();
+        // 2. calcular dias a generar simplificamos generando los siguientes 30 dias
+        int daysToGenerate = 30;
 
         // 3. calcular bloques de horario completos
         Map<LocalTime, LocalTime> blocks = new LinkedHashMap<>(); // usamos LinkedHashMap para mantener el orden de insercion
