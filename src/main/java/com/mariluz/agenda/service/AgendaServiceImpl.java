@@ -2,6 +2,7 @@ package com.mariluz.agenda.service;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
+import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.exceptions.InvalidWorkTimeException;
 import com.mariluz.agenda.exceptions.SlotsAlreadyGenerated;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
@@ -157,7 +158,12 @@ public class AgendaServiceImpl implements AgendaService {
         agendaSlotRepo.saveAll(slotsToSave);
     }
 
-    // 3. mostrar horarios (con id para seleccionar)
+    // 3. listar bloques horarios
+    @Override
+    public List<SlotsResponse> listSlots() {
+        List<SlotsResponse> slots = agendaSlotRepo.getAllSlotsAsDTOs();
+        return slots;
+    }
 
     // 4. reservar slot (cliente)
 

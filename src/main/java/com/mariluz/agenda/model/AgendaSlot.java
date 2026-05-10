@@ -42,7 +42,7 @@ public class AgendaSlot {
 
     // esta disponible?
     @Column(nullable = false)
-    private Boolean isAvailable;
+    private boolean isAvailable;
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
