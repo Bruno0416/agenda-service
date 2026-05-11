@@ -137,7 +137,6 @@ public class GlobalExceptionHandler {
     }
 
     // Handler error generico de JWT
-
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<ErrorResponse> handleJsonParseError(
         JwtException ex,
