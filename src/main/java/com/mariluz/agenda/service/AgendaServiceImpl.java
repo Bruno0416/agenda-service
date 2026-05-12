@@ -8,8 +8,6 @@ import com.mariluz.agenda.exceptions.SlotsAlreadyGenerated;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
 import com.mariluz.agenda.model.AgendaSlot;
-import com.mariluz.agenda.model.Holiday;
-import com.mariluz.agenda.model.HolidayResponse;
 import com.mariluz.agenda.model.User;
 import com.mariluz.agenda.repository.AgendaConfigRepository;
 import com.mariluz.agenda.repository.AgendaSlotRepository;
@@ -27,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 @Service
 public class AgendaServiceImpl implements AgendaService {
@@ -157,7 +154,7 @@ public class AgendaServiceImpl implements AgendaService {
                 });
             }
         }
-        // agendaSlotRepo.saveAll(slotsToSave);
+        agendaSlotRepo.saveAll(slotsToSave);
     }
 
     // 3. listar bloques horarios
