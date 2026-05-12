@@ -2,15 +2,19 @@ package com.mariluz.agenda.service;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
+import com.mariluz.agenda.dto.ReservationRequest;
+import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.exceptions.InvalidWorkTimeException;
 import com.mariluz.agenda.exceptions.SlotsAlreadyGenerated;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
 import com.mariluz.agenda.model.AgendaSlot;
+import com.mariluz.agenda.model.Reservation;
 import com.mariluz.agenda.model.User;
 import com.mariluz.agenda.repository.AgendaConfigRepository;
 import com.mariluz.agenda.repository.AgendaSlotRepository;
+import com.mariluz.agenda.repository.ReservationRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -34,6 +38,9 @@ public class AgendaServiceImpl implements AgendaService {
 
     @Autowired
     private AgendaSlotRepository agendaSlotRepo;
+
+    @Autowired
+    private ReservationRepository reservationRepo;
 
     // 1. configurar agenda (admin)
     @Override
@@ -165,8 +172,41 @@ public class AgendaServiceImpl implements AgendaService {
     }
 
     // 4. reservar slot (cliente)
+    @Override
+    public ReservationResponse createReservation(ReservationRequest request) {
+        // 1. sacar info usuario
+        User user = getCurrentUser();
+        // 2. validar disponibilidad bloque horario (isAvailable)
+        if (
+            !agendaSlotRepo.existsByIdAndIsAvailableTrueAndDateAfter(
+                request.getSlotId(),
+                LocalDate.now()
+            )
+        ) {
+            // si el bloque no esta disponible arrojamos un error
+            System.out.println("ERRORRRRRRRRRRRRRRRRRRRRR");
+        }
+        // 3. crear reserva
+        Reservation reservation = Reservation.builder()
+            .userId(user.getId())
+            .agendaSlot(agendaSlotRepo.getReferenceById(request.getSlotId()))
+            .createdAt(LocalDateTime.now())
+            .updatedAt(LocalDateTime.now())
+            .build();
 
-    // ------------------ Helper para validar rol usuario -------------------
+        // guardar reserva
+        reservationRepo.save(reservation);
+
+        // 3.5 mandar correo al usuario (correo extraido por JWT)
+        // 4. retornar hora creada
+        return ReservationResponse.builder()
+            .id(reservation.getId())
+            .startTime(reservation.getAgendaSlot().getStartTime())
+            .endTime(reservation.getAgendaSlot().getEndTime())
+            .build();
+    }
+
+    // ------------------ Helpers privados para validar rol usuario -------------------
 
     private User getCurrentUser() {
         Authentication auth =

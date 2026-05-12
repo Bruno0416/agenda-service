@@ -24,7 +24,7 @@ public class AgendaConfigLoader {
                         //  hr / min / seg
                         .startWorkTime(LocalTime.of(9, 00, 0))
                         .endWorkTime(LocalTime.of(14, 30, 0))
-                        .slotDuration(20)
+                        .slotDuration(30)
                         .workDays(workDays)
                         .updatedAt(LocalDateTime.now())
                         .build()

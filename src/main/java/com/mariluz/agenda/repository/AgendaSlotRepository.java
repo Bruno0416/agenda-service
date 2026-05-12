@@ -2,6 +2,7 @@ package com.mariluz.agenda.repository;
 
 import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.model.AgendaSlot;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,7 @@ public interface AgendaSlotRepository
 {
     Optional<AgendaSlot> findFirstByOrderByDateDesc();
 
+    // query para obtener el bloque con formato del dto
     @Query(
         "SELECT new com.mariluz.agenda.dto.SlotsResponse(" +
             "s.id, " +
@@ -24,4 +26,10 @@ public interface AgendaSlotRepository
             "AND s.isAvailable = true" // agregamos filtro para mostrar solo los horarios disponibles
     )
     List<SlotsResponse> getAllSlotsAsDTOs();
+
+    // validacion del bloque antes de agendar la hora
+    public boolean existsByIdAndIsAvailableTrueAndDateAfter(
+        Integer id,
+        LocalDate date
+    );
 }

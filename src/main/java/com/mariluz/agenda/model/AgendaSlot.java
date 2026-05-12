@@ -29,7 +29,7 @@ public class AgendaSlot {
     private Integer id;
 
     // fecha del slot
-    @Column(nullable = false)
+    @Column(nullable = false, name = "date")
     private LocalDate date;
 
     // hora inicio
