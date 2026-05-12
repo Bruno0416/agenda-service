@@ -2,11 +2,11 @@ package com.mariluz.agenda.service;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
-import com.mariluz.agenda.dto.ReservationRequest;
 import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
+import com.mariluz.agenda.exceptions.InvalidAgendaSlotException;
 import com.mariluz.agenda.exceptions.InvalidWorkTimeException;
-import com.mariluz.agenda.exceptions.SlotsAlreadyGenerated;
+import com.mariluz.agenda.exceptions.SlotsAlreadyGeneratedException;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
 import com.mariluz.agenda.model.AgendaSlot;
@@ -15,6 +15,7 @@ import com.mariluz.agenda.model.User;
 import com.mariluz.agenda.repository.AgendaConfigRepository;
 import com.mariluz.agenda.repository.AgendaSlotRepository;
 import com.mariluz.agenda.repository.ReservationRepository;
+import jakarta.validation.ReportAsSingleViolation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -41,6 +42,29 @@ public class AgendaServiceImpl implements AgendaService {
 
     @Autowired
     private ReservationRepository reservationRepo;
+
+    // ------------------ Helpers privados para validar rol usuario -------------------
+
+    private User getCurrentUser() {
+        Authentication auth =
+            SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof User user)) {
+            throw new UnauthorizedOperationException(
+                "No hay un usuario autenticado"
+            );
+        }
+
+        return user;
+    }
+
+    private void validateAdminAccess(String message) {
+        User user = getCurrentUser();
+
+        if (!user.getRole().equalsIgnoreCase("ADMIN")) {
+            // si el usuario no es admin arrojamos un error
+            throw new UnauthorizedOperationException(message);
+        }
+    }
 
     // 1. configurar agenda (admin)
     @Override
@@ -94,7 +118,7 @@ public class AgendaServiceImpl implements AgendaService {
         if (lastSlot.isPresent() && lastSlot.get().getDate().isAfter(today)) {
             LocalDate lastSlotDate = lastSlot.get().getDate();
 
-            throw new SlotsAlreadyGenerated(
+            throw new SlotsAlreadyGeneratedException(
                 "Los horarios para el mes ya han sido generados. Intente nuevamente despues del " +
                     lastSlotDate.format(
                         DateTimeFormatter.ofPattern(
@@ -173,23 +197,25 @@ public class AgendaServiceImpl implements AgendaService {
 
     // 4. reservar slot (cliente)
     @Override
-    public ReservationResponse createReservation(ReservationRequest request) {
+    public ReservationResponse createReservation(Integer slotId) {
         // 1. sacar info usuario
         User user = getCurrentUser();
         // 2. validar disponibilidad bloque horario (isAvailable)
         if (
             !agendaSlotRepo.existsByIdAndIsAvailableTrueAndDateAfter(
-                request.getSlotId(),
+                slotId,
                 LocalDate.now()
             )
         ) {
-            // si el bloque no esta disponible arrojamos un error
-            System.out.println("ERRORRRRRRRRRRRRRRRRRRRRR");
+            // si el bloque no esta disponible (es de una fecha anterior a la de ejecución o isAvailable = false) arrojamos un error
+            throw new InvalidAgendaSlotException(
+                "Bloque horario invalido. Verifique nuevamente el ID ingresado."
+            );
         }
         // 3. crear reserva
         Reservation reservation = Reservation.builder()
             .userId(user.getId())
-            .agendaSlot(agendaSlotRepo.getReferenceById(request.getSlotId()))
+            .agendaSlot(agendaSlotRepo.getReferenceById(slotId))
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
             .build();
@@ -197,35 +223,19 @@ public class AgendaServiceImpl implements AgendaService {
         // guardar reserva
         reservationRepo.save(reservation);
 
+        // actualizar estado slot
+        Optional<AgendaSlot> ag = agendaSlotRepo.findById(slotId);
+        AgendaSlot slot = ag.get();
+        slot.setAvailable(false);
+        agendaSlotRepo.save(slot);
+
         // 3.5 mandar correo al usuario (correo extraido por JWT)
+
         // 4. retornar hora creada
         return ReservationResponse.builder()
             .id(reservation.getId())
             .startTime(reservation.getAgendaSlot().getStartTime())
             .endTime(reservation.getAgendaSlot().getEndTime())
             .build();
-    }
-
-    // ------------------ Helpers privados para validar rol usuario -------------------
-
-    private User getCurrentUser() {
-        Authentication auth =
-            SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !(auth.getPrincipal() instanceof User user)) {
-            throw new UnauthorizedOperationException(
-                "No hay un usuario autenticado"
-            );
-        }
-
-        return user;
-    }
-
-    private void validateAdminAccess(String message) {
-        User user = getCurrentUser();
-
-        if (!user.getRole().equalsIgnoreCase("ADMIN")) {
-            // si el usuario no es admin arrojamos un error
-            throw new UnauthorizedOperationException(message);
-        }
     }
 }

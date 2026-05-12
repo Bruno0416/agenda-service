@@ -2,7 +2,6 @@ package com.mariluz.agenda.controller;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
-import com.mariluz.agenda.dto.ReservationRequest;
 import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.service.AgendaService;
@@ -42,10 +41,10 @@ public class AgendaController {
     }
 
     // 4. reservar slot (cliente)
-    @PostMapping("/reservation")
+    @PostMapping("/reservation/{slotId}")
     public ResponseEntity<ReservationResponse> createReservation(
-        @Valid @RequestBody ReservationRequest request
+        @Valid @PathVariable Integer slotId
     ) {
-        return ResponseEntity.ok().body(service.createReservation(request));
+        return ResponseEntity.ok().body(service.createReservation(slotId));
     }
 }

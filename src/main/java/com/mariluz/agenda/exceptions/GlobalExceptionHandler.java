@@ -17,6 +17,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Handler Horario invalido al reservar
+    @ExceptionHandler(InvalidAgendaSlotException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidAgendaSlotException(
+        InvalidAgendaSlotException ex,
+        HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Error al agendar -> horario invalido")
+                .errors(Map.of("error", ex.getMessage()))
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
     // Handler Horario invalido
     @ExceptionHandler(InvalidWorkTimeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidWorkTimeException(
@@ -35,9 +52,9 @@ public class GlobalExceptionHandler {
     }
 
     // Handler bloques horarios
-    @ExceptionHandler(SlotsAlreadyGenerated.class)
+    @ExceptionHandler(SlotsAlreadyGeneratedException.class)
     public ResponseEntity<ErrorResponse> handleSlotsAlreadyGenerated(
-        SlotsAlreadyGenerated ex,
+        SlotsAlreadyGeneratedException ex,
         HttpServletRequest request
     ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
