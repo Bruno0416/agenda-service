@@ -15,7 +15,6 @@ import com.mariluz.agenda.model.User;
 import com.mariluz.agenda.repository.AgendaConfigRepository;
 import com.mariluz.agenda.repository.AgendaSlotRepository;
 import com.mariluz.agenda.repository.ReservationRepository;
-import jakarta.validation.ReportAsSingleViolation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
