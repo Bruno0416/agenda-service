@@ -2,6 +2,7 @@ package com.mariluz.agenda.controller;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
+import com.mariluz.agenda.dto.MyReservationResponse;
 import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.service.AgendaService;
@@ -24,20 +25,20 @@ public class AgendaController {
     public ResponseEntity<AgendaConfigResponse> configAgenda(
         @Valid @RequestBody AgendaConfigRequest request
     ) {
-        return ResponseEntity.ok().body(service.configAgenda(request));
+        return ResponseEntity.ok(service.configAgenda(request));
     }
 
     // 2. generar agenda(admin)
     @PostMapping("/generate")
     public ResponseEntity<?> generateAgenda() {
         service.generateAgenda();
-        return ResponseEntity.ok().body("");
+        return ResponseEntity.ok("");
     }
 
     // 3. ver horarios (cliente)
     @GetMapping("/slots")
     public ResponseEntity<List<SlotsResponse>> listSlots() {
-        return ResponseEntity.ok().body(service.listSlots());
+        return ResponseEntity.ok(service.listSlots());
     }
 
     // 4. reservar slot (cliente)
@@ -45,6 +46,12 @@ public class AgendaController {
     public ResponseEntity<ReservationResponse> createReservation(
         @Valid @PathVariable Integer slotId
     ) {
-        return ResponseEntity.ok().body(service.createReservation(slotId));
+        return ResponseEntity.ok(service.createReservation(slotId));
+    }
+
+    // 5. mostrar slots reserva activos
+    @GetMapping("/my-reservations")
+    public ResponseEntity<List<MyReservationResponse>> myReservations() {
+        return ResponseEntity.ok(service.myReservations());
     }
 }

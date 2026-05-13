@@ -2,6 +2,7 @@ package com.mariluz.agenda.service;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
+import com.mariluz.agenda.dto.MyReservationResponse;
 import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
 import java.util.List;
@@ -20,4 +21,5 @@ public interface AgendaService {
     public ReservationResponse createReservation(Integer slotId);
 
     // 5. lista de reservas activas
+    public List<MyReservationResponse> myReservations();
 }

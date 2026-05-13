@@ -2,6 +2,7 @@ package com.mariluz.agenda.service;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
+import com.mariluz.agenda.dto.MyReservationResponse;
 import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.exceptions.InvalidAgendaSlotException;
@@ -236,5 +237,37 @@ public class AgendaServiceImpl implements AgendaService {
             .startTime(reservation.getAgendaSlot().getStartTime())
             .endTime(reservation.getAgendaSlot().getEndTime())
             .build();
+    }
+
+    // 5. mostrar slots reserva activos
+    @Override
+    public List<MyReservationResponse> myReservations() {
+        // 1. obtener al usuario
+        User user = getCurrentUser();
+        // 2. obtener lista de reservas del usuario
+        List<Reservation> reservations =
+            reservationRepo.findByUserIdAndAgendaSlot_DateAfter(
+                user.getId(),
+                LocalDate.now()
+            );
+
+        if (reservations.isEmpty()) {
+            return new ArrayList<>();
+        }
+        // 3. transformar reservas a dtos
+        List<MyReservationResponse> reservationsResponse = new ArrayList<>();
+        reservations.forEach(r ->
+            reservationsResponse.add(
+                MyReservationResponse.builder()
+                    .id(r.getId())
+                    .date(r.getAgendaSlot().getDate())
+                    .startTime(r.getAgendaSlot().getStartTime())
+                    .endTime(r.getAgendaSlot().getEndTime())
+                    .build()
+            )
+        );
+
+        // 4. mostrar dto
+        return reservationsResponse;
     }
 }
