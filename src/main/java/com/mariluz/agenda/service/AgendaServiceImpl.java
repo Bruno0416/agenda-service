@@ -43,6 +43,9 @@ public class AgendaServiceImpl implements AgendaService {
     @Autowired
     private ReservationRepository reservationRepo;
 
+    @Autowired
+    private NotificationClientService notiService;
+
     // ------------------ Helpers privados para validar rol usuario -------------------
 
     private User getCurrentUser() {
@@ -230,6 +233,11 @@ public class AgendaServiceImpl implements AgendaService {
         agendaSlotRepo.save(slot);
 
         // 3.5 mandar correo al usuario (correo extraido por JWT)
+        String email = user.getEmail();
+        String title = "Reserva Confirmada";
+        String message = "Tu cita ha sido confirmada. ";
+
+        notiService.sendReservationEmail(email, title, message, false);
 
         // 4. retornar hora creada
         return ReservationResponse.builder()

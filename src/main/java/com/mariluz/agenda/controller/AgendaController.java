@@ -54,4 +54,6 @@ public class AgendaController {
     public ResponseEntity<List<MyReservationResponse>> myReservations() {
         return ResponseEntity.ok(service.myReservations());
     }
+
+    // 6. cancelar reserva
 }
