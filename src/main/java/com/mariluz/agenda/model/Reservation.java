@@ -12,12 +12,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
 
 @Data
 @Builder
@@ -37,12 +35,6 @@ public class Reservation {
     @JoinColumn(name = "agendaSlotId", nullable = false)
     private AgendaSlot agendaSlot;
 
-    // fecha y hora para saber la creacion de la reserva
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    // fecha y hora para saber cuando se actualizo por ultima vez
     @Column(nullable = false)
-    private LocalDateTime updatedAt;
+    private Status status;
 }

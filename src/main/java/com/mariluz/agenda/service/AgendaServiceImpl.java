@@ -2,16 +2,19 @@ package com.mariluz.agenda.service;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
+import com.mariluz.agenda.dto.CancellationResponse;
 import com.mariluz.agenda.dto.MyReservationResponse;
 import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.exceptions.InvalidAgendaSlotException;
+import com.mariluz.agenda.exceptions.InvalidReservationException;
 import com.mariluz.agenda.exceptions.InvalidWorkTimeException;
 import com.mariluz.agenda.exceptions.SlotsAlreadyGeneratedException;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
 import com.mariluz.agenda.model.AgendaSlot;
 import com.mariluz.agenda.model.Reservation;
+import com.mariluz.agenda.model.Status;
 import com.mariluz.agenda.model.User;
 import com.mariluz.agenda.repository.AgendaConfigRepository;
 import com.mariluz.agenda.repository.AgendaSlotRepository;
@@ -106,7 +109,7 @@ public class AgendaServiceImpl implements AgendaService {
     2. generar agenda(admin) ----> solo genera la agenda para el mes
     */
     @Override
-    public void generateAgenda() {
+    public String generateAgenda() {
         //------ Validar rol del usuario //------
         validateAdminAccess("Solo un administrador puede generar la agenda");
 
@@ -189,6 +192,8 @@ public class AgendaServiceImpl implements AgendaService {
             }
         }
         agendaSlotRepo.saveAll(slotsToSave);
+
+        return "Horario creado con exito.";
     }
 
     // 3. listar bloques horarios
@@ -219,8 +224,7 @@ public class AgendaServiceImpl implements AgendaService {
         Reservation reservation = Reservation.builder()
             .userId(user.getId())
             .agendaSlot(agendaSlotRepo.getReferenceById(slotId))
-            .createdAt(LocalDateTime.now())
-            .updatedAt(LocalDateTime.now())
+            .status(Status.ACTIVE)
             .build();
 
         // guardar reserva
@@ -254,9 +258,10 @@ public class AgendaServiceImpl implements AgendaService {
         User user = getCurrentUser();
         // 2. obtener lista de reservas del usuario
         List<Reservation> reservations =
-            reservationRepo.findByUserIdAndAgendaSlot_DateAfter(
+            reservationRepo.findByUserIdAndAgendaSlot_DateAfterAndStatus(
                 user.getId(),
-                LocalDate.now()
+                LocalDate.now(),
+                Status.ACTIVE
             );
 
         if (reservations.isEmpty()) {
@@ -277,5 +282,33 @@ public class AgendaServiceImpl implements AgendaService {
 
         // 4. mostrar dto
         return reservationsResponse;
+    }
+
+    @Override
+    public CancellationResponse cancelReservation(Integer resId) {
+        // 1. encontrar y comprobar que existe la reserva (arrojar error en caso de que no exista)
+        Optional<Reservation> resOpt = reservationRepo.findById(resId);
+        if (!resOpt.isPresent()) {
+            throw new InvalidReservationException(
+                "La reserva del ID ingresado no existe"
+            );
+        }
+        Reservation res = resOpt.get();
+
+        // 2. cambiar status reserva
+        res.setStatus(Status.CANCELED);
+        // 2.1 guardar reserva actualizada (cancelada)
+        reservationRepo.save(res);
+
+        // 3. cambiar isAvailable a true para el bloque horario
+        AgendaSlot slot = res.getAgendaSlot();
+        slot.setAvailable(true);
+        // 3.1 guardar bloque actualizado
+        agendaSlotRepo.save(slot);
+
+        // 4. retornar mensaje de exito
+        return CancellationResponse.builder()
+            .message("Reserva cancelada exitosamente")
+            .build();
     }
 }

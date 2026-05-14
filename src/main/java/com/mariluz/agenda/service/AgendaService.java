@@ -2,6 +2,7 @@ package com.mariluz.agenda.service;
 
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
+import com.mariluz.agenda.dto.CancellationResponse;
 import com.mariluz.agenda.dto.MyReservationResponse;
 import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
@@ -12,7 +13,7 @@ public interface AgendaService {
     public AgendaConfigResponse configAgenda(AgendaConfigRequest request);
 
     // 2. generar agenda(admin)
-    public void generateAgenda();
+    public String generateAgenda();
 
     // 3. listar horas
     public List<SlotsResponse> listSlots();
@@ -22,4 +23,7 @@ public interface AgendaService {
 
     // 5. lista de reservas activas
     public List<MyReservationResponse> myReservations();
+
+    // 6. cancelar reserva
+    public CancellationResponse cancelReservation(Integer resId);
 }
