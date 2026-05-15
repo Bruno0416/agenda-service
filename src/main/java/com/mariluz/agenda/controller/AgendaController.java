@@ -9,17 +9,17 @@ import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.service.AgendaService;
 import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/agenda")
+@RequiredArgsConstructor
 public class AgendaController {
 
-    @Autowired
-    private AgendaService service;
+    private final AgendaService service;
 
     // ----- Endpoints -----
     // 1. configurar agenda (admin)

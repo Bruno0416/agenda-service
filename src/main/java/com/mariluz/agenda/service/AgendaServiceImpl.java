@@ -29,25 +29,22 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class AgendaServiceImpl implements AgendaService {
 
-    @Autowired
-    private AgendaConfigRepository agendaConfigRepo;
+    private final AgendaConfigRepository agendaConfigRepo;
 
-    @Autowired
-    private AgendaSlotRepository agendaSlotRepo;
+    private final AgendaSlotRepository agendaSlotRepo;
 
-    @Autowired
-    private ReservationRepository reservationRepo;
+    private final ReservationRepository reservationRepo;
 
-    @Autowired
-    private NotificationClientService notiService;
+    private final NotificationClientService notiService;
 
     // ------------------ Helpers privados para validar rol usuario -------------------
 

@@ -23,13 +23,20 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
+    private final HandlerExceptionResolver exceptionResolver;
 
-    // Inyección de dependencia para resolver excepciones
     @Autowired
-    @Qualifier("handlerExceptionResolver")
-    private HandlerExceptionResolver exceptionResolver;
+    public JwtAuthenticationFilter(
+        JwtUtil jwtUtil,
+        // Inyección de dependencia para resolver excepciones
+        @Qualifier(
+            "handlerExceptionResolver"
+        ) HandlerExceptionResolver exceptionResolver
+    ) {
+        this.jwtUtil = jwtUtil;
+        this.exceptionResolver = exceptionResolver;
+    }
 
     @Override
     protected void doFilterInternal(
