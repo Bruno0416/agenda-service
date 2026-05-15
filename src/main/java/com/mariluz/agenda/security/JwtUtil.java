@@ -59,7 +59,7 @@ public class JwtUtil {
 
         return User.builder()
             .id(claims.get("id", String.class))
-            .username(claims.getSubject())
+            .name(claims.getSubject())
             .email(claims.get("email", String.class))
             .role(claims.get("role", String.class))
             .build();
