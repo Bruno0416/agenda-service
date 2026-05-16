@@ -206,6 +206,7 @@ public class AgendaServiceImpl implements AgendaService {
         // 1. sacar info usuario
         User user = getCurrentUser();
         // 2. validar disponibilidad bloque horario (isAvailable)
+
         if (
             !agendaSlotRepo.existsByIdAndIsAvailableTrueAndDateAfter(
                 slotId,
@@ -228,8 +229,10 @@ public class AgendaServiceImpl implements AgendaService {
         reservationRepo.save(reservation);
 
         // actualizar estado slot
-        Optional<AgendaSlot> ag = agendaSlotRepo.findById(slotId);
-        AgendaSlot slot = ag.get();
+        AgendaSlot slot = agendaSlotRepo
+            .findById(slotId)
+            .orElseThrow(() -> new RuntimeException("Slot no encontrado"));
+
         slot.setAvailable(false);
         agendaSlotRepo.save(slot);
 
@@ -284,13 +287,13 @@ public class AgendaServiceImpl implements AgendaService {
     @Override
     public CancellationResponse cancelReservation(Integer resId) {
         // 1. encontrar y comprobar que existe la reserva (arrojar error en caso de que no exista)
-        Optional<Reservation> resOpt = reservationRepo.findById(resId);
-        if (!resOpt.isPresent()) {
-            throw new InvalidReservationException(
-                "La reserva del ID ingresado no existe"
+        Reservation res = reservationRepo
+            .findById(resId)
+            .orElseThrow(() ->
+                new InvalidReservationException(
+                    "La reserva del ID ingresado no existe"
+                )
             );
-        }
-        Reservation res = resOpt.get();
 
         // 2. cambiar status reserva
         res.setStatus(Status.CANCELED);
