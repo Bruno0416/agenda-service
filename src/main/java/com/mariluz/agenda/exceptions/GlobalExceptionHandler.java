@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
             ErrorResponse.builder()
                 .timeStamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
+                .status(HttpStatus.FORBIDDEN.value())
                 .message("Debe ser administrador para realizar esta operacion")
                 .errors(Map.of("error", ex.getMessage()))
                 .endpoint(request.getRequestURI())
@@ -145,7 +145,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
             ErrorResponse.builder()
                 .timeStamp(LocalDateTime.now())
-                .status(HttpStatus.UNAUTHORIZED.value())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .message("Token expirado")
                 .errors(error)
                 .endpoint(request.getRequestURI())
@@ -167,7 +167,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
             ErrorResponse.builder()
                 .timeStamp(LocalDateTime.now())
-                .status(HttpStatus.UNAUTHORIZED.value())
+                .status(HttpStatus.BAD_REQUEST.value())
                 .message("Error de token")
                 .errors(error)
                 .endpoint(request.getRequestURI())
