@@ -3,7 +3,7 @@ Servicio dedicado a comunicarse con MS-Notifications -> usando  RestClient
 RestClient es mas nuevo y tiene mejor soporte para las nuevas versiones de Spring
 */
 
-package com.mariluz.agenda.service;
+package com.mariluz.agenda.client;
 
 import com.mariluz.agenda.dto.notifications.NotificationRequest;
 import org.springframework.stereotype.Service;
