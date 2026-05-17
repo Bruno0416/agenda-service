@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -45,7 +46,8 @@ public class AgendaConfig {
 
     @Setter(AccessLevel.NONE) // para no generar nada automaticamente
     @Column(nullable = false)
-    private List<Integer> workDays; // solo 1-7 | lo validamos con el dto
+    @Builder.Default // para evitar que el deje sin inicializar la lista
+    private List<Integer> workDays = new ArrayList<>(); // solo 1-7 | lo validamos con el dto
 
     @Column(nullable = false)
     private LocalDateTime updatedAt; // fecha/hora actualizacion
