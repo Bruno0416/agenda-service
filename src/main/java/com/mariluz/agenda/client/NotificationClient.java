@@ -10,11 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 @Service
-public class NotificationClientService {
+public class NotificationClient {
 
     private final RestClient restClient;
 
-    public NotificationClientService() {
+    public NotificationClient() {
         // Asignamos URL base para la conexion con el microservicio
         this.restClient = RestClient.builder()
             .baseUrl("http://localhost:8082/notifications")

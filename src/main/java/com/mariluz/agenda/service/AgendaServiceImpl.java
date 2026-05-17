@@ -1,6 +1,6 @@
 package com.mariluz.agenda.service;
 
-import com.mariluz.agenda.client.NotificationClientService;
+import com.mariluz.agenda.client.NotificationClient;
 import com.mariluz.agenda.dto.AgendaConfigRequest;
 import com.mariluz.agenda.dto.AgendaConfigResponse;
 import com.mariluz.agenda.dto.CancellationResponse;
@@ -45,7 +45,7 @@ public class AgendaServiceImpl implements AgendaService {
 
     private final ReservationRepository reservationRepo;
 
-    private final NotificationClientService notiService;
+    private final NotificationClient notiService;
 
     // ------------------ Helpers privados para validar rol usuario -------------------
 
