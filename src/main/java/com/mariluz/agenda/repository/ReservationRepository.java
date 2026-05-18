@@ -12,7 +12,7 @@ public interface ReservationRepository
     extends JpaRepository<Reservation, Integer>
 {
     // obtiene todas las reservas (objeto completo con la relacion de agendaSlot) que le pertenezcan al usuario(userId) y sean despues de SYSDATE
-    List<Reservation> findByUserIdAndAgendaSlot_DateAfterAndStatus(
+    public List<Reservation> findByUserIdAndAgendaSlot_DateAfterAndStatus(
         String userId,
         LocalDate currentDate,
         Status status

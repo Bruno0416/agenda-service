@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 public interface AgendaSlotRepository
     extends JpaRepository<AgendaSlot, Integer>
 {
-    Optional<AgendaSlot> findFirstByOrderByDateDesc();
+    public Optional<AgendaSlot> findFirstByOrderByDateDesc();
 
     // query para obtener el bloque con formato del dto
     @Query(
@@ -25,7 +25,7 @@ public interface AgendaSlotRepository
             "WHERE s.date > CURRENT_DATE " + // agregamos where para que no devuelva slots anteriores a la fecha actual
             "AND s.isAvailable = true" // agregamos filtro para mostrar solo los horarios disponibles
     )
-    List<SlotsResponse> getAllSlotsAsDTOs();
+    public List<SlotsResponse> getAllSlotsAsDTOs();
 
     // validacion del bloque antes de agendar la hora
     public boolean existsByIdAndIsAvailableTrueAndDateAfter(
