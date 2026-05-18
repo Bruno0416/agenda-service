@@ -41,7 +41,7 @@ public class NotificationClient {
                 .uri("/reservation")
                 .body(content)
                 .retrieve()
-                .toBodilessEntity(); // Restorna la respuesta sin cuerpo (solo el status 200)
+                .toBodilessEntity(); // Retorna la respuesta sin cuerpo (solo el status 200)
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
