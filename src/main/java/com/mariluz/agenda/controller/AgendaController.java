@@ -8,15 +8,18 @@ import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.service.AgendaService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/agenda")
 @RequiredArgsConstructor
+@Validated
 public class AgendaController {
 
     private final AgendaService service;
@@ -47,9 +50,11 @@ public class AgendaController {
     // 4. reservar slot (cliente)
     @PostMapping("/reservation/{slotId}")
     public ResponseEntity<ReservationResponse> createReservation(
-        @Valid @PathVariable Integer slotId
+        @Positive @PathVariable Integer slotId
     ) {
-        return ResponseEntity.ok(service.createReservation(slotId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            service.createReservation(slotId)
+        );
     }
 
     // 5. mostrar slots reserva activos
@@ -59,12 +64,10 @@ public class AgendaController {
     }
 
     // 6. cancelar reserva
-    @PostMapping("/cancel-reservation/{id}")
+    @DeleteMapping("/reservation/{id}")
     public ResponseEntity<CancellationResponse> cancelReservation(
-        @Valid @PathVariable Integer id
+        @Positive @PathVariable Integer id
     ) {
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
-            service.cancelReservation(id)
-        );
+        return ResponseEntity.ok(service.cancelReservation(id));
     }
 }

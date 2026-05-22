@@ -15,15 +15,16 @@ public interface AgendaSlotRepository
 {
     public Optional<AgendaSlot> findFirstByOrderByDateDesc();
 
-    // query para obtener el bloque con formato del dto
+    // query para obtener los bloques disponibles como dto
     @Query(
         "SELECT new com.mariluz.agenda.dto.SlotsResponse(" +
             "s.id, " +
             "s.date, " +
-            "CONCAT(FUNCTION('DATE_FORMAT', s.startTime, '%H:%i'), '-', FUNCTION('DATE_FORMAT', s.endTime, '%H:%i'))) " + // concatenamos hora inicio + hora fin
+            "s.startTime, " +
+            "s.endTime) " +
             "FROM agenda_slot s " +
-            "WHERE s.date > CURRENT_DATE " + // agregamos where para que no devuelva slots anteriores a la fecha actual
-            "AND s.isAvailable = true" // agregamos filtro para mostrar solo los horarios disponibles
+            "WHERE s.date > CURRENT_DATE " +
+            "AND s.isAvailable = true"
     )
     public List<SlotsResponse> getAllSlotsAsDTOs();
 

@@ -12,6 +12,7 @@
 package com.mariluz.agenda.client;
 
 import com.mariluz.agenda.dto.notifications.NotificationRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -20,10 +21,12 @@ public class NotificationClient {
 
     private final RestClient restClient;
 
-    public NotificationClient() {
+    public NotificationClient(
+        @Value("${notification.service.url}") String notificationServiceUrl
+    ) {
         // Asignamos URL base para la conexion con el microservicio
         this.restClient = RestClient.builder()
-            .baseUrl("http://localhost:8082/notifications")
+            .baseUrl(notificationServiceUrl)
             .build();
     }
 

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,9 @@ public class AgendaConfigRequest {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime endWorkTime;
 
-    @NotNull(message = "la duracion del slot no puede estar vacia.")
+    @NotNull(message = "La duración del slot no puede estar vacía.")
+    @Positive(message = "La duración debe ser un número positivo.")
+    @Min(value = 10, message = "La duración mínima del slot es de 10 minutos.")
     private Integer slotDuration;
 
     @NotEmpty(message = "Los dias de trabajo no pueden estar vacios.")

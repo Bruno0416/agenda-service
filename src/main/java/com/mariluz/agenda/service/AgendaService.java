@@ -10,20 +10,20 @@ import java.util.List;
 
 public interface AgendaService {
     // 1. configurar agenda (admin)
-    public AgendaConfigResponse configAgenda(AgendaConfigRequest request);
+    AgendaConfigResponse configAgenda(AgendaConfigRequest request);
 
     // 2. generar agenda(admin)
-    public String generateAgenda();
+    String generateAgenda();
 
     // 3. listar horas
-    public List<SlotsResponse> listSlots();
+    List<SlotsResponse> listSlots();
 
     // 4. crear reserva
-    public ReservationResponse createReservation(Integer slotId);
+    ReservationResponse createReservation(Integer slotId);
 
     // 5. lista de reservas activas
-    public List<MyReservationResponse> myReservations();
+    List<MyReservationResponse> myReservations();
 
     // 6. cancelar reserva
-    public CancellationResponse cancelReservation(Integer resId);
+    CancellationResponse cancelReservation(Integer resId);
 }

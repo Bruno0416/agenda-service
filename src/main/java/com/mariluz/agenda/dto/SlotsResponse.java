@@ -1,6 +1,7 @@
 package com.mariluz.agenda.dto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,5 +15,7 @@ public class SlotsResponse {
 
     private LocalDate date;
 
-    private String time;
+    private LocalTime startTime;
+
+    private LocalTime endTime;
 }

@@ -4,6 +4,7 @@ import com.mariluz.agenda.dto.ErrorResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,16 +53,33 @@ public class GlobalExceptionHandler {
         );
     }
 
+    // Handler reserva no encontrada
+    @ExceptionHandler(InvalidReservationException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidReservationException(
+        InvalidReservationException ex,
+        HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.NOT_FOUND.value())
+                .message("Reserva no encontrada")
+                .errors(Map.of("error", ex.getMessage()))
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
     // Handler bloques horarios
     @ExceptionHandler(SlotsAlreadyGeneratedException.class)
     public ResponseEntity<ErrorResponse> handleSlotsAlreadyGenerated(
         SlotsAlreadyGeneratedException ex,
         HttpServletRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
             ErrorResponse.builder()
                 .timeStamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
+                .status(HttpStatus.CONFLICT.value())
                 .message("Los bloques horarios ya han sido generados")
                 .errors(Map.of("error", ex.getMessage()))
                 .endpoint(request.getRequestURI())
@@ -75,11 +93,11 @@ public class GlobalExceptionHandler {
         HttpRequestMethodNotSupportedException ex,
         HttpServletRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(
             ErrorResponse.builder()
                 .timeStamp(LocalDateTime.now())
-                .status(HttpStatus.NOT_FOUND.value())
-                .message("Venta no encontrada")
+                .status(HttpStatus.METHOD_NOT_ALLOWED.value())
+                .message("Método HTTP no permitido")
                 .errors(Map.of("error", ex.getMessage()))
                 .endpoint(request.getRequestURI())
                 .build()
@@ -98,6 +116,28 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.FORBIDDEN.value())
                 .message("Debe ser administrador para realizar esta operacion")
                 .errors(Map.of("error", ex.getMessage()))
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
+    // Handler validacion de parametros de ruta y metodo
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+        ConstraintViolationException ex,
+        HttpServletRequest request
+    ) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(v ->
+            errors.put(v.getPropertyPath().toString(), v.getMessage())
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message("Error de validacion")
+                .errors(errors)
                 .endpoint(request.getRequestURI())
                 .build()
         );
@@ -159,10 +199,10 @@ public class GlobalExceptionHandler {
             "El token ha expirado. Por favor, inicie sesión nuevamente."
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
             ErrorResponse.builder()
                 .timeStamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
+                .status(HttpStatus.UNAUTHORIZED.value())
                 .message("Token expirado")
                 .errors(error)
                 .endpoint(request.getRequestURI())
@@ -172,7 +212,7 @@ public class GlobalExceptionHandler {
 
     // Handler error generico de JWT
     @ExceptionHandler(JwtException.class)
-    public ResponseEntity<ErrorResponse> handleJsonParseError(
+    public ResponseEntity<ErrorResponse> handleJwtException(
         JwtException ex,
         HttpServletRequest request
     ) {
@@ -181,10 +221,10 @@ public class GlobalExceptionHandler {
             "El token proporcionado es inválido o está corrupto."
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
             ErrorResponse.builder()
                 .timeStamp(LocalDateTime.now())
-                .status(HttpStatus.BAD_REQUEST.value())
+                .status(HttpStatus.UNAUTHORIZED.value())
                 .message("Error de token")
                 .errors(error)
                 .endpoint(request.getRequestURI())

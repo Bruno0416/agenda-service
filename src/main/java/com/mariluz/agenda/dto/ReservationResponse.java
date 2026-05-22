@@ -13,9 +13,7 @@ public class ReservationResponse {
     // id reserva
     private Integer id;
 
-    // rango horario reserva (ej: HH:mm - HH:mm)
     private LocalTime startTime;
 
-    // mensaje para confirmar que la hora se envio al correo
     private LocalTime endTime;
 }

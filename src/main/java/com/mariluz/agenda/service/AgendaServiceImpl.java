@@ -136,7 +136,9 @@ public class AgendaServiceImpl implements AgendaService {
         // 1. acceder a la configuracion de agenda
         Optional<AgendaConfig> configOpt = agendaConfigRepo.findById(1);
         if (configOpt.isEmpty()) {
-            throw new RuntimeException(); // No deberia ocurrir (inicializamos la tabla con el AgendaConfigLoader)
+            throw new RuntimeException(
+                "No se encontró la configuración de agenda"
+            );
         }
 
         AgendaConfig config = configOpt.get();
@@ -235,6 +237,7 @@ public class AgendaServiceImpl implements AgendaService {
             .orElseThrow(() -> new RuntimeException("Slot no encontrado"));
 
         slot.setAvailable(false);
+        slot.setUpdatedAt(LocalDateTime.now());
         agendaSlotRepo.save(slot);
 
         // 3.5 mandar correo al usuario (correo extraido por JWT)
@@ -296,6 +299,21 @@ public class AgendaServiceImpl implements AgendaService {
                 )
             );
 
+        // validar que la reserva pertenece al usuario autenticado
+        User currentUser = getCurrentUser();
+        if (!res.getUserId().equals(currentUser.getId())) {
+            throw new UnauthorizedOperationException(
+                "No tienes permiso para cancelar una reserva que no te pertenece"
+            );
+        }
+
+        // validar que la reserva no este cancelada previamente
+        if (res.getStatus() == Status.CANCELED) {
+            throw new InvalidReservationException(
+                "La reserva ya fue cancelada"
+            );
+        }
+
         // 2. cambiar status reserva
         res.setStatus(Status.CANCELED);
         // 2.1 guardar reserva actualizada (cancelada)
@@ -304,6 +322,7 @@ public class AgendaServiceImpl implements AgendaService {
         // 3. cambiar isAvailable a true para el bloque horario
         AgendaSlot slot = res.getAgendaSlot();
         slot.setAvailable(true);
+        slot.setUpdatedAt(LocalDateTime.now());
         // 3.1 guardar bloque actualizado
         agendaSlotRepo.save(slot);
 
