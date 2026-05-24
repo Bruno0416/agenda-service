@@ -8,14 +8,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalTime;
 import java.util.List;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import org.hibernate.validator.constraints.UniqueElements;
 
 @Data
-@Builder
-@AllArgsConstructor
 public class AgendaConfigRequest {
 
     @NotNull(message = "La hora es obligatoria.")

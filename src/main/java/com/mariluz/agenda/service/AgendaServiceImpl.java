@@ -11,6 +11,7 @@ import com.mariluz.agenda.exceptions.InvalidAgendaSlotException;
 import com.mariluz.agenda.exceptions.InvalidReservationException;
 import com.mariluz.agenda.exceptions.InvalidWorkTimeException;
 import com.mariluz.agenda.exceptions.SlotsAlreadyGeneratedException;
+import com.mariluz.agenda.exceptions.UnauthenticatedException;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
 import com.mariluz.agenda.model.AgendaConfig;
 import com.mariluz.agenda.model.AgendaSlot;
@@ -53,11 +54,8 @@ public class AgendaServiceImpl implements AgendaService {
         Authentication auth =
             SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !(auth.getPrincipal() instanceof User user)) {
-            throw new UnauthorizedOperationException(
-                "No hay un usuario autenticado"
-            );
+            throw new UnauthenticatedException("No hay un usuario autenticado");
         }
-
         return user;
     }
 
