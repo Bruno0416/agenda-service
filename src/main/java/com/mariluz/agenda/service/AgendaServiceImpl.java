@@ -239,7 +239,6 @@ public class AgendaServiceImpl implements AgendaService {
 
         // actualizar estado slot
         slot.setAvailable(false);
-        slot.setUpdatedAt(LocalDateTime.now());
         agendaSlotRepo.save(slot);
 
         // 3.5 mandar correo al usuario (email extraido por JWT)
