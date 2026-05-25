@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Data
 @Builder
@@ -44,6 +45,7 @@ public class AgendaSlot {
     @Column(nullable = false)
     private boolean isAvailable;
 
+    @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 }

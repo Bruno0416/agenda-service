@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -203,6 +204,7 @@ public class AgendaServiceImpl implements AgendaService {
 
     // 4. reservar slot (cliente)
     @Override
+    @Transactional
     public ReservationResponse createReservation(Integer slotId) {
         // 1. sacar info usuario
         User user = getCurrentUser();
@@ -219,10 +221,16 @@ public class AgendaServiceImpl implements AgendaService {
                 "Bloque horario invalido. Verifique nuevamente el ID ingresado."
             );
         }
+        // obtener slot
+        AgendaSlot slot = agendaSlotRepo
+            .findById(slotId)
+            .orElseThrow(() ->
+                new InvalidAgendaSlotException("Slot no encontrado")
+            );
         // 3. crear reserva
         Reservation reservation = Reservation.builder()
             .userId(user.getId())
-            .agendaSlot(agendaSlotRepo.getReferenceById(slotId))
+            .agendaSlot(slot)
             .status(Status.ACTIVE)
             .build();
 
@@ -230,20 +238,21 @@ public class AgendaServiceImpl implements AgendaService {
         reservationRepo.save(reservation);
 
         // actualizar estado slot
-        AgendaSlot slot = agendaSlotRepo
-            .findById(slotId)
-            .orElseThrow(() -> new RuntimeException("Slot no encontrado"));
-
         slot.setAvailable(false);
         slot.setUpdatedAt(LocalDateTime.now());
         agendaSlotRepo.save(slot);
 
-        // 3.5 mandar correo al usuario (correo extraido por JWT)
+        // 3.5 mandar correo al usuario (email extraido por JWT)
         String email = user.getEmail();
         String title = "Reserva Confirmada";
-        String message = "Tu cita ha sido confirmada. ";
+        String message = "Tu cita ha sido confirmada.";
 
-        notiService.sendReservationEmail(email, title, message, false);
+        try {
+            notiService.sendReservationEmail(email, title, message, false);
+        } catch (Exception e) {
+            // usamos try/catch para evitar interrumpir la reserva si hay un error al enviar el correo
+            System.out.println("Error: " + e.getMessage());
+        }
 
         // 4. retornar hora creada
         return ReservationResponse.builder()
@@ -320,7 +329,7 @@ public class AgendaServiceImpl implements AgendaService {
         // 3. cambiar isAvailable a true para el bloque horario
         AgendaSlot slot = res.getAgendaSlot();
         slot.setAvailable(true);
-        slot.setUpdatedAt(LocalDateTime.now());
+
         // 3.1 guardar bloque actualizado
         agendaSlotRepo.save(slot);
 
