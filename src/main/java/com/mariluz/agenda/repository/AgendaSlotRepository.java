@@ -15,7 +15,7 @@ public interface AgendaSlotRepository
 {
     public Optional<AgendaSlot> findFirstByOrderByDateDesc();
 
-    // query para obtener los bloques disponibles como dto
+    // query para obtener los bloques disponibles como dto (incluye slots de hoy)
     @Query(
         "SELECT new com.mariluz.agenda.dto.SlotsResponse(" +
             "s.id, " +
@@ -23,13 +23,13 @@ public interface AgendaSlotRepository
             "s.startTime, " +
             "s.endTime) " +
             "FROM agenda_slot s " +
-            "WHERE s.date > CURRENT_DATE " +
+            "WHERE s.date >= CURRENT_DATE " +
             "AND s.isAvailable = true"
     )
     public List<SlotsResponse> getAllSlotsAsDTOs();
 
-    // validacion del bloque antes de agendar la hora
-    public boolean existsByIdAndIsAvailableTrueAndDateAfter(
+    // validacion del bloque antes de agendar la hora (incluye slots de hoy)
+    public boolean existsByIdAndIsAvailableTrueAndDateGreaterThanEqual(
         Integer id,
         LocalDate date
     );

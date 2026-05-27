@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
 
     // Handler reserva no encontrada
     @ExceptionHandler(InvalidReservationException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidReservationException(
+    public ResponseEntity<ErrorResponse> handleInvalidReservation(
         InvalidReservationException ex,
         HttpServletRequest request
     ) {
@@ -65,6 +65,40 @@ public class GlobalExceptionHandler {
                 .timeStamp(LocalDateTime.now())
                 .status(HttpStatus.NOT_FOUND.value())
                 .message("Reserva no encontrada")
+                .errors(Map.of("error", ex.getMessage()))
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
+    // Handler reserva ya cancelada
+    @ExceptionHandler(ReservationAlreadyCanceledException.class)
+    public ResponseEntity<ErrorResponse> handleReservationAlreadyCanceled(
+        ReservationAlreadyCanceledException ex,
+        HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .message("La reserva ya fue cancelada")
+                .errors(Map.of("error", ex.getMessage()))
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
+    // Handler configuracion de agenda no encontrada
+    @ExceptionHandler(AgendaConfigNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAgendaConfigNotFound(
+        AgendaConfigNotFoundException ex,
+        HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .message("Error interno: configuracion de agenda no disponible")
                 .errors(Map.of("error", ex.getMessage()))
                 .endpoint(request.getRequestURI())
                 .build()
@@ -99,6 +133,23 @@ public class GlobalExceptionHandler {
                 .timeStamp(LocalDateTime.now())
                 .status(HttpStatus.METHOD_NOT_ALLOWED.value())
                 .message("Método HTTP no permitido")
+                .errors(Map.of("error", ex.getMessage()))
+                .endpoint(request.getRequestURI())
+                .build()
+        );
+    }
+
+    // Handler usuario no autenticado
+    @ExceptionHandler(UnauthenticatedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthenticated(
+        UnauthenticatedException ex,
+        HttpServletRequest request
+    ) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+            ErrorResponse.builder()
+                .timeStamp(LocalDateTime.now())
+                .status(HttpStatus.UNAUTHORIZED.value())
+                .message("Usuario no autenticado")
                 .errors(Map.of("error", ex.getMessage()))
                 .endpoint(request.getRequestURI())
                 .build()

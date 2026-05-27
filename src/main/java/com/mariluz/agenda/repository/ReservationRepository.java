@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 public interface ReservationRepository
     extends JpaRepository<Reservation, Integer>
 {
-    // obtiene todas las reservas (objeto completo con la relacion de agendaSlot) que le pertenezcan al usuario(userId) y sean despues de SYSDATE
-    public List<Reservation> findByUserIdAndAgendaSlot_DateAfterAndStatus(
+    // obtiene todas las reservas activas del usuario incluyendo las de hoy
+    public List<Reservation> findByUserIdAndAgendaSlot_DateGreaterThanEqualAndStatus(
         String userId,
         LocalDate currentDate,
         Status status

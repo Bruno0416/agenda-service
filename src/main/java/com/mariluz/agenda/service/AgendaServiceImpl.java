@@ -7,9 +7,11 @@ import com.mariluz.agenda.dto.CancellationResponse;
 import com.mariluz.agenda.dto.MyReservationResponse;
 import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
+import com.mariluz.agenda.exceptions.AgendaConfigNotFoundException;
 import com.mariluz.agenda.exceptions.InvalidAgendaSlotException;
 import com.mariluz.agenda.exceptions.InvalidReservationException;
 import com.mariluz.agenda.exceptions.InvalidWorkTimeException;
+import com.mariluz.agenda.exceptions.ReservationAlreadyCanceledException;
 import com.mariluz.agenda.exceptions.SlotsAlreadyGeneratedException;
 import com.mariluz.agenda.exceptions.UnauthenticatedException;
 import com.mariluz.agenda.exceptions.UnauthorizedOperationException;
@@ -32,11 +34,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AgendaServiceImpl implements AgendaService {
@@ -135,7 +139,7 @@ public class AgendaServiceImpl implements AgendaService {
         // 1. acceder a la configuracion de agenda
         Optional<AgendaConfig> configOpt = agendaConfigRepo.findById(1);
         if (configOpt.isEmpty()) {
-            throw new RuntimeException(
+            throw new AgendaConfigNotFoundException(
                 "No se encontró la configuración de agenda"
             );
         }
@@ -165,7 +169,7 @@ public class AgendaServiceImpl implements AgendaService {
 
         // 3. recorrer lista con los dias | mas adelante -> filtrar los feriados
         List<AgendaSlot> slotsToSave = new ArrayList<>();
-        for (int i = 0; i <= daysToGenerate; i++) {
+        for (int i = 0; i < daysToGenerate; i++) {
             // 4. crear los bloques horarios
             LocalDate date = today.plusDays(i);
             // 1. obtener valor dia de la semana
@@ -211,7 +215,7 @@ public class AgendaServiceImpl implements AgendaService {
         // 2. validar disponibilidad bloque horario (isAvailable)
 
         if (
-            !agendaSlotRepo.existsByIdAndIsAvailableTrueAndDateAfter(
+            !agendaSlotRepo.existsByIdAndIsAvailableTrueAndDateGreaterThanEqual(
                 slotId,
                 LocalDate.now()
             )
@@ -249,8 +253,8 @@ public class AgendaServiceImpl implements AgendaService {
         try {
             notiService.sendReservationEmail(email, title, message, false);
         } catch (Exception e) {
-            // usamos try/catch para evitar interrumpir la reserva si hay un error al enviar el correo
-            System.out.println("Error: " + e.getMessage());
+            // no interrumpimos la reserva si falla el envio del correo
+            log.warn("Error al enviar correo de confirmacion al usuario {}: {}", email, e.getMessage());
         }
 
         // 4. retornar hora creada
@@ -268,7 +272,7 @@ public class AgendaServiceImpl implements AgendaService {
         User user = getCurrentUser();
         // 2. obtener lista de reservas del usuario
         List<Reservation> reservations =
-            reservationRepo.findByUserIdAndAgendaSlot_DateAfterAndStatus(
+            reservationRepo.findByUserIdAndAgendaSlot_DateGreaterThanEqualAndStatus(
                 user.getId(),
                 LocalDate.now(),
                 Status.ACTIVE
@@ -295,6 +299,7 @@ public class AgendaServiceImpl implements AgendaService {
     }
 
     @Override
+    @Transactional
     public CancellationResponse cancelReservation(Integer resId) {
         // 1. encontrar y comprobar que existe la reserva (arrojar error en caso de que no exista)
         Reservation res = reservationRepo
@@ -313,9 +318,16 @@ public class AgendaServiceImpl implements AgendaService {
             );
         }
 
+        // validar que la reserva no sea de una fecha pasada
+        if (!res.getAgendaSlot().getDate().isAfter(LocalDate.now())) {
+            throw new InvalidReservationException(
+                "No se puede cancelar una reserva de una fecha pasada"
+            );
+        }
+
         // validar que la reserva no este cancelada previamente
         if (res.getStatus() == Status.CANCELED) {
-            throw new InvalidReservationException(
+            throw new ReservationAlreadyCanceledException(
                 "La reserva ya fue cancelada"
             );
         }
