@@ -96,8 +96,8 @@ public interface AgendaApi {
                     value = """
                     {
                         "endpoint": "/agenda/config",
-                        "errors": { "error": "Acceso denegado" },
-                        "message": "Acceso denegado",
+                        "errors": { "error": "Solo un administrador puede configurar la agenda" },
+                        "message": "Debe ser administrador para realizar esta operacion",
                         "status": 403,
                         "timeStamp": "2026-06-12T05:11:58"
                     }
@@ -196,7 +196,7 @@ public interface AgendaApi {
                     {
                         "endpoint": "/agenda/generate",
                         "errors": { "error": "Solo un administrador puede realizar esta acción." },
-                        "message": "Acceso denegado",
+                        "message": "Debe ser administrador para realizar esta operacion",
                         "status": 403,
                         "timeStamp": "2026-06-12T05:11:58"
                     }
@@ -272,25 +272,6 @@ public interface AgendaApi {
                         "errors": { "error": "Token no válido o expirado" },
                         "message": "Error de autenticacion",
                         "status": 401,
-                        "timeStamp": "2026-06-12T05:11:58"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "403",
-            description = "No tiene permisos para acceder a este recurso.",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                        "endpoint": "/agenda/slots",
-                        "errors": { "error": "Acceso denegado" },
-                        "message": "Acceso denegado",
-                        "status": 403,
                         "timeStamp": "2026-06-12T05:11:58"
                     }
                     """
@@ -382,25 +363,6 @@ public interface AgendaApi {
             )
         ),
         @ApiResponse(
-            responseCode = "403",
-            description = "No tiene permisos para acceder a este recurso.",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                        "endpoint": "/agenda/reservation/{slotId}",
-                        "errors": { "error": "Acceso denegado" },
-                        "message": "Acceso denegado",
-                        "status": 403,
-                        "timeStamp": "2026-06-12T05:11:58"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
             responseCode = "500",
             description = "Error interno del servidor.",
             content = @Content(
@@ -477,25 +439,6 @@ public interface AgendaApi {
             )
         ),
         @ApiResponse(
-            responseCode = "403",
-            description = "No tiene permisos para acceder a este recurso.",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                        "endpoint": "/agenda/my-reservations",
-                        "errors": { "error": "Acceso denegado" },
-                        "message": "Acceso denegado",
-                        "status": 403,
-                        "timeStamp": "2026-06-12T05:11:58"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
             responseCode = "500",
             description = "Error interno del servidor.",
             content = @Content(
@@ -534,25 +477,6 @@ public interface AgendaApi {
                     value = """
                     {
                         "message": "Reserva cancelada exitosamente"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "No se puede cancelar una reserva del día actual o de una fecha pasada.",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                        "endpoint": "/agenda/reservation/10",
-                        "errors": { "error": "No es posible cancelar una reserva del día de hoy o de fechas anteriores" },
-                        "message": "Error al agendar -> horario invalido",
-                        "status": 400,
-                        "timeStamp": "2026-06-12T05:11:58"
                     }
                     """
                 )
@@ -609,25 +533,6 @@ public interface AgendaApi {
                         "errors": { "error": "Token no válido o expirado" },
                         "message": "Error de autenticacion",
                         "status": 401,
-                        "timeStamp": "2026-06-12T05:11:58"
-                    }
-                    """
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "403",
-            description = "No tiene permisos para acceder a este recurso.",
-            content = @Content(
-                mediaType = "application/json",
-                schema = @Schema(implementation = ErrorResponse.class),
-                examples = @ExampleObject(
-                    value = """
-                    {
-                        "endpoint": "/agenda/reservation/{id}",
-                        "errors": { "error": "Acceso denegado" },
-                        "message": "Acceso denegado",
-                        "status": 403,
                         "timeStamp": "2026-06-12T05:11:58"
                     }
                     """
