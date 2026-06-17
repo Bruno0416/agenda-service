@@ -20,12 +20,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/agenda")
 @RequiredArgsConstructor
 @Validated
-public class AgendaController {
+public class AgendaController implements AgendaApi {
 
     private final AgendaService service;
 
     // ----- Endpoints -----
     // 1. configurar agenda (admin)
+    @Override
     @PostMapping("/config")
     public ResponseEntity<AgendaConfigResponse> configAgenda(
         @Valid @RequestBody AgendaConfigRequest request
@@ -33,7 +34,8 @@ public class AgendaController {
         return ResponseEntity.ok(service.configAgenda(request));
     }
 
-    // 2. generar agenda(admin)
+    // 2. generar agenda (admin)
+    @Override
     @PostMapping("/generate")
     public ResponseEntity<String> generateAgenda() {
         return ResponseEntity.status(HttpStatus.CREATED).body(
@@ -42,12 +44,14 @@ public class AgendaController {
     }
 
     // 3. ver horarios (cliente)
+    @Override
     @GetMapping("/slots")
     public ResponseEntity<List<SlotsResponse>> listSlots() {
         return ResponseEntity.ok(service.listSlots());
     }
 
     // 4. reservar slot (cliente)
+    @Override
     @PostMapping("/reservation/{slotId}")
     public ResponseEntity<ReservationResponse> createReservation(
         @Positive @PathVariable Integer slotId
@@ -57,13 +61,15 @@ public class AgendaController {
         );
     }
 
-    // 5. mostrar slots reserva activos
+    // 5. mostrar reservas activas
+    @Override
     @GetMapping("/my-reservations")
     public ResponseEntity<List<MyReservationResponse>> myReservations() {
         return ResponseEntity.ok(service.myReservations());
     }
 
     // 6. cancelar reserva
+    @Override
     @DeleteMapping("/reservation/{id}")
     public ResponseEntity<CancellationResponse> cancelReservation(
         @Positive @PathVariable Integer id
