@@ -13,11 +13,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 public interface AgendaApi {
     // ----- Endpoints -----
@@ -125,9 +122,8 @@ public interface AgendaApi {
             )
         ),
     })
-    @PostMapping("/config")
-    public ResponseEntity<AgendaConfigResponse> configAgenda(
-        @Valid @RequestBody AgendaConfigRequest request
+    ResponseEntity<AgendaConfigResponse> configAgenda(
+        AgendaConfigRequest request
     );
 
     // 2. generar agenda (admin)
@@ -224,8 +220,7 @@ public interface AgendaApi {
             )
         ),
     })
-    @PostMapping("/generate")
-    public ResponseEntity<String> generateAgenda();
+    ResponseEntity<String> generateAgenda();
 
     // 3. ver horarios (cliente)
     @Operation(
@@ -298,8 +293,7 @@ public interface AgendaApi {
             )
         ),
     })
-    @GetMapping("/slots")
-    public ResponseEntity<List<SlotsResponse>> listSlots();
+    ResponseEntity<List<SlotsResponse>> listSlots();
 
     // 4. reservar slot (cliente)
     @Operation(
@@ -382,10 +376,7 @@ public interface AgendaApi {
             )
         ),
     })
-    @PostMapping("/reservation/{slotId}")
-    public ResponseEntity<ReservationResponse> createReservation(
-        @Positive @PathVariable Integer slotId
-    );
+    ResponseEntity<ReservationResponse> createReservation(Integer slotId);
 
     // 5. mostrar reservas activas
     @Operation(
@@ -458,8 +449,7 @@ public interface AgendaApi {
             )
         ),
     })
-    @GetMapping("/my-reservations")
-    public ResponseEntity<List<MyReservationResponse>> myReservations();
+    ResponseEntity<List<MyReservationResponse>> myReservations();
 
     // 6. cancelar reserva
     @Operation(
@@ -559,8 +549,5 @@ public interface AgendaApi {
             )
         ),
     })
-    @DeleteMapping("/reservation/{id}")
-    public ResponseEntity<CancellationResponse> cancelReservation(
-        @Positive @PathVariable Integer id
-    );
+    ResponseEntity<CancellationResponse> cancelReservation(Integer id);
 }
