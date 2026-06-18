@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 
@@ -123,7 +125,7 @@ public interface AgendaApi {
         ),
     })
     ResponseEntity<AgendaConfigResponse> configAgenda(
-        AgendaConfigRequest request
+        @Valid AgendaConfigRequest request
     );
 
     // 2. generar agenda (admin)
@@ -376,7 +378,9 @@ public interface AgendaApi {
             )
         ),
     })
-    ResponseEntity<ReservationResponse> createReservation(Integer slotId);
+    ResponseEntity<ReservationResponse> createReservation(
+        @Positive Integer slotId
+    );
 
     // 5. mostrar reservas activas
     @Operation(
@@ -549,5 +553,7 @@ public interface AgendaApi {
             )
         ),
     })
-    ResponseEntity<CancellationResponse> cancelReservation(Integer id);
+    ResponseEntity<CancellationResponse> cancelReservation(
+        @Positive Integer id
+    );
 }

@@ -7,8 +7,6 @@ import com.mariluz.agenda.dto.MyReservationResponse;
 import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.dto.SlotsResponse;
 import com.mariluz.agenda.service.AgendaService;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +27,7 @@ public class AgendaController implements AgendaApi {
     @Override
     @PostMapping("/config")
     public ResponseEntity<AgendaConfigResponse> configAgenda(
-        @Valid @RequestBody AgendaConfigRequest request
+        @RequestBody AgendaConfigRequest request
     ) {
         return ResponseEntity.ok(service.configAgenda(request));
     }
@@ -54,7 +52,7 @@ public class AgendaController implements AgendaApi {
     @Override
     @PostMapping("/reservation/{slotId}")
     public ResponseEntity<ReservationResponse> createReservation(
-        @Positive @PathVariable Integer slotId
+        @PathVariable Integer slotId
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
             service.createReservation(slotId)
@@ -72,7 +70,7 @@ public class AgendaController implements AgendaApi {
     @Override
     @DeleteMapping("/reservation/{id}")
     public ResponseEntity<CancellationResponse> cancelReservation(
-        @Positive @PathVariable Integer id
+        @PathVariable Integer id
     ) {
         return ResponseEntity.ok(service.cancelReservation(id));
     }
