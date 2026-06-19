@@ -15,6 +15,7 @@ import com.mariluz.agenda.dto.ReservationResponse;
 import com.mariluz.agenda.exceptions.InvalidReservationException;
 import com.mariluz.agenda.exceptions.ReservationAlreadyCanceledException;
 import com.mariluz.agenda.exceptions.SlotsAlreadyGeneratedException;
+import com.mariluz.agenda.exceptions.UnauthenticatedException;
 import com.mariluz.agenda.security.JwtUtil;
 import com.mariluz.agenda.service.AgendaService;
 import java.time.LocalTime;
@@ -97,6 +98,30 @@ public class AgendaControllerTest {
             .andExpect(status().isBadRequest());
     }
 
+    // 401
+    @Test
+    public void testCreateProductUnauthorized() throws Exception {
+        // 1. preparar request prueba
+        AgendaConfigRequest request = new AgendaConfigRequest();
+        request.setStartWorkTime(LocalTime.of(9, 0));
+        request.setEndWorkTime(LocalTime.of(17, 0));
+        request.setSlotDuration(10);
+        request.setWorkDays(List.of(1, 2, 3, 4, 5));
+
+        // 2. ejecutar test
+        when(service.configAgenda(request)).thenThrow(
+            new UnauthenticatedException("No hay un usuario autenticado.")
+        );
+
+        mockMvc
+            .perform(
+                post("/agenda/config")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request))
+            )
+            .andExpect(status().isUnauthorized());
+    }
+
     // -------------- 2. GENERATE AGENDA --------------
 
     // Codigo 201
@@ -105,6 +130,18 @@ public class AgendaControllerTest {
         mockMvc
             .perform(post("/agenda/generate"))
             .andExpect(status().isCreated());
+    }
+
+    // Codigo 401
+    @Test
+    public void testGenerateAgendaUnauthorized() throws Exception {
+        doThrow(new UnauthenticatedException("No hay un usuario autenticado."))
+            .when(service)
+            .generateAgenda();
+
+        mockMvc
+            .perform(post("/agenda/generate"))
+            .andExpect(status().isUnauthorized());
     }
 
     // Codigo 409
@@ -127,7 +164,7 @@ public class AgendaControllerTest {
         mockMvc.perform(get("/agenda/slots")).andExpect(status().isOk());
     }
 
-    // -------------- 4. RESERVATIONS --------------
+    // -------------- 4. RESERVATION --------------
 
     // 201
     @Test
